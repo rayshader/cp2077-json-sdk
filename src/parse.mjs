@@ -2,40 +2,50 @@ import fs from "fs";
 import Parser from "tree-sitter";
 import GrammarCPP from "tree-sitter-cpp";
 
-import {debug, error, nicePath} from "./logger.mjs";
+import {print, debug, error, nicePath} from "./logger.mjs";
 
 const parser = new Parser();
 parser.setLanguage(GrammarCPP);
 
-export function parse(files) {
+export function parse(files, verbose) {
     const types = [];
+    let errors = 0;
 
     for (const file of files) {
-        const type = _parseFile(file);
+        const type = _parseFile(file, errors, verbose);
 
         if (type) {
             types.push(type);
+        } else {
+            errors++;
         }
     }
-    return types;
+    return {types, errors: errors};
 }
 
-function _parseFile(path) {
+function _parseFile(path, errors, verbose) {
     try {
         const code = fs.readFileSync(path, {encoding: 'utf8'});
         const tree = parser.parse(code);
 
         const objects = _parseNodes(tree.rootNode);
 
-        debug(JSON.stringify(objects, null, 2));
+        //debug(JSON.stringify(objects, null, 2));
         //debug(JSON.stringify(objects));
         return {
             path: path,
             objects: objects
         };
     } catch (e) {
-        error(`Failed to parse file ${nicePath(path)}:`);
-        error(e);
+        if (errors === 0) {
+            print('');
+        }
+        if (!verbose) {
+            error(`Failed to parse file ${nicePath(path)}.`);
+        } else {
+            error(`Failed to parse file ${nicePath(path)}:`);
+            error(e);
+        }
         return null;
     }
 }
@@ -91,7 +101,7 @@ function _parseNode(node, parent) {
 
                 parent.methods.push(method);
                 break;
-            } else if (_isProperty(decl)) {
+            } else {
                 const property = _parseProperty(node);
 
                 parent.properties.push(property);
@@ -159,32 +169,28 @@ function _parseMethod(node, object) {
         comment = comment.trim().replace('//', '');
         offset = Number.parseInt(comment, 16);
     }
+    const it = _parseType(node);
+    const returnType = it.data;
 
-    let decl = node.childForFieldName('declarator');
-    let isPtr = false;
-
-    if (decl.type === 'pointer_declarator') {
-        isPtr = true;
-        decl = decl.childForFieldName('declarator');
-    }
+    let decl = it.next;
 
     const isVirtual = node.text.startsWith('virtual');
     const isOverride = node.text.includes('override');
     const isPure = node.text.endsWith(' = 0;');
-    const name = decl.childForFieldName('declarator')?.text ?? '<unknown>';
+    const name = decl.childForFieldName('declarator')?.text;
 
+    if (!name) {
+        throw new Error(`Failed to parse name of method in:\n${node.text}`);
+    }
     const parameters = decl.childForFieldName('parameters');
     const args = _toList(parameters).map(param => _parseArgument(param));
-
-    const returnTypeNode = node.childForFieldName('type');
-    const returnType = `${returnTypeNode?.text ?? 'void'}${isPtr ? '*' : ''}`;
 
     const method = {};
 
     if (isVirtual) {
         method.virtual = true;
     }
-    if (returnType !== 'void') {
+    if (!_isVoid(returnType)) {
         method.returnType = returnType;
     }
     if (object.name === name) {
@@ -210,9 +216,76 @@ function _parseMethod(node, object) {
 }
 
 function _parseArgument(node) {
+    const it = _parseType(node);
+
     return {
-        type: node.childForFieldName('type')?.text ?? 'void',
-        name: node.childForFieldName('declarator').text
+        type: it.data,
+        name: it.next.text,
+    };
+}
+
+function _parseType(node) {
+    const typeNode = node.childForFieldName('type');
+
+    if (typeNode.type === 'template_type') {
+        return _parseTemplateType(node);
+    }
+    const name = typeNode.text;
+    let decl = node.childForFieldName('declarator');
+    let isConst = false;
+    let isPtr = false;
+    let isRef = false;
+
+    if (node.firstNamedChild.text === 'const') {
+        isConst = true;
+    }
+    if (decl?.type === 'pointer_declarator') {
+        isPtr = true;
+        decl = decl.child(1);
+    }
+    if (decl?.type === 'reference_declarator') {
+        isRef = true;
+        decl = decl.child(1);
+    }
+    const type = {};
+
+    // TODO: const/volatile/etc.
+    if (isConst) {
+        type.const = true;
+    }
+    type.name = name;
+    if (isPtr) {
+        type.ptr = true;
+    }
+    if (isRef) {
+        type.ref = true;
+    }
+    return {
+        data: type,
+        next: decl
+    };
+}
+
+function _parseTemplateType(node) {
+    const type = node.childForFieldName('type');
+    const args = type.childForFieldName('arguments');
+    const templates = [];
+
+    for (let i = 0; i < args.namedChildCount; i++) {
+        const template = _parseType(args.namedChild(i));
+
+        templates.push(template.data);
+    }
+    const name = type.childForFieldName('name');
+    const templateType = {
+        name: name.text,
+        templates: templates,
+    };
+    const decl = node.childForFieldName('declarator');
+
+    return {
+        data: templateType,
+        next: decl
     };
 }
 
@@ -224,17 +297,13 @@ function _parseProperty(node) {
         comment = comment.trim().replace('//', '');
         offset = Number.parseInt(comment, 16);
     }
-    let decl = node.childForFieldName('declarator');
-    let isPtr = false;
+    const it = _parseType(node);
+    const type = it.data;
+    const decl = it.next;
 
-    if (decl.type === 'pointer_declarator') {
-        isPtr = true;
-        decl = decl.childForFieldName('declarator');
-    }
-    const type = `${node.childForFieldName('type').text}${isPtr ? '*' : ''}`;
     const property = {};
 
-    if (type !== 'void') {
+    if (!_isVoid(type)) {
         property.type = type;
     }
     property.name = decl.text;
@@ -259,12 +328,8 @@ function _isMethod(node) {
     return false;
 }
 
-function _isProperty(node) {
-    if (node.type === 'pointer_declarator') {
-        return true;
-    }
-    // TODO
-    return false;
+function _isVoid(type) {
+    return type.name === 'void' && !type.ptr && !type.ref;
 }
 
 function _findObjectBody(node) {
