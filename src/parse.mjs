@@ -57,7 +57,9 @@ function _parseNodes(node, parent) {
     for (const child of children) {
         const object = _parseNode(child, parent);
 
-        if (object) {
+        if (object && object instanceof Array) {
+            objects.push(...object);
+        } else if (object) {
             objects.push(object);
         }
     }
@@ -68,22 +70,31 @@ function _parseNode(node, parent) {
     switch (node.type) {
         case 'namespace_definition': {
             const it = _parseNamespace(node);
-            const object = {namespace: it.data.namespace};
+            const ns = it.data;
+            const object = {};
+            let objects = _parseNodes(it.next, object);
 
-            _parseNodes(it.next, object);
-            return object;
+            objects = objects.filter(object => {
+                if (object.type !== 'namespace') {
+                    return true;
+                }
+                return object.objects.length > 0;
+            });
+            ns.objects.push(...objects);
+            return ns;
         }
-        // TODO: add support for multiple class/struct in same file
-        //       either using { and } or some other token.
+        // TODO: support templates on struct/class
+        //       support multiple inheritance
         case 'struct_specifier':
         case 'class_specifier': {
             const it = _parseObject(node);
 
-            if (it) {
+            if (it && parent) {
                 for (const key of Object.keys(it.data)) {
                     parent[key] = it.data[key];
                 }
                 _parseNodes(it.next, parent);
+                return it.data;
             }
             break;
         }
@@ -134,7 +145,9 @@ function _parseNode(node, parent) {
 function _parseNamespace(node) {
     return {
         data: {
+            type: 'namespace',
             namespace: node.childForFieldName('name').text,
+            objects: [],
         },
         next: node.childForFieldName('body')
     };
@@ -232,12 +245,19 @@ function _parseType(node) {
     }
     const name = typeNode.text;
     let decl = node.childForFieldName('declarator');
+    let fixedArraySize = 0;
     let isConst = false;
     let isPtr = false;
     let isRef = false;
 
     if (node.firstNamedChild.text === 'const') {
         isConst = true;
+    }
+    if (decl?.type === 'array_declarator') {
+        const sizeNode = decl.childForFieldName('size');
+
+        fixedArraySize = eval(sizeNode.text);
+        decl = decl.firstNamedChild;
     }
     if (decl?.type === 'pointer_declarator') {
         isPtr = true;
@@ -254,6 +274,9 @@ function _parseType(node) {
         type.const = true;
     }
     type.name = name;
+    if (fixedArraySize) {
+        type.fixedArray = fixedArraySize;
+    }
     if (isPtr) {
         type.ptr = true;
     }
