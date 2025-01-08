@@ -70,7 +70,7 @@ const files = traverse(srcPath);
 printOK();
 
 info(`Parsing ${chalk.bold(files.length)} source file${files.length > 1 ? 's' : ''}...`, false);
-const {types, errors} = parse(files);
+const {types, errors} = parse(files, verbose);
 
 if (errors === 0) {
     printOK();
