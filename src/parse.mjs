@@ -27,11 +27,8 @@ function _parseFile(path, errors, verbose) {
     try {
         const code = fs.readFileSync(path, {encoding: 'utf8'});
         const tree = parser.parse(code);
-
         const objects = _parseNodes(tree.rootNode);
 
-        //debug(JSON.stringify(objects, null, 2));
-        //debug(JSON.stringify(objects));
         return {
             path: path,
             objects: objects
@@ -110,14 +107,9 @@ function _parseNode(node, parent) {
             const decl = node.childForFieldName('declarator');
 
             if (_isMethod(decl)) {
-                const method = _parseMethod(node, parent);
-
-                parent.methods.push(method);
-                break;
+                _parseMethod(node, parent);
             } else {
-                const property = _parseProperty(node);
-
-                parent.properties.push(property);
+                _parseProperty(node, parent);
             }
             /*
             debug('what:');
@@ -126,14 +118,14 @@ function _parseNode(node, parent) {
             break;
         }
         case 'function_declarator': {
-            const method = _parseMethod(node, parent);
-
-            parent.methods.push(method);
+            _parseMethod(node, parent);
             break;
         }
         case 'function_definition': {
             if (_isDtor(node, parent)) {
                 _parseDtor(node, parent);
+            } else if (_isMethod(node)) {
+                _parseMethod(node, parent);
             }
             break;
         }
@@ -226,7 +218,8 @@ function _parseDtor(node, object) {
 }
 
 function _parseMethod(node, object) {
-    let comment = node.nextSibling?.text;
+    let commentNode = _findComment(node);
+    let comment = commentNode?.text;
     let offset = null;
 
     if (comment) {
@@ -234,10 +227,12 @@ function _parseMethod(node, object) {
         offset = Number.parseInt(comment, 16);
     }
     const it = _parseType(node);
+
+    if (!it) {
+        return;
+    }
     const returnType = it.data;
-
-    let decl = it.next;
-
+    const decl = it.next;
     const isVirtual = node.text.startsWith('virtual');
     const isOverride = node.text.includes('override');
     const isPure = node.text.endsWith(' = 0;');
@@ -276,7 +271,7 @@ function _parseMethod(node, object) {
     if (Number.isInteger(offset)) {
         method.offset = offset;
     }
-    return method;
+    object.methods.push(method);
 }
 
 function _parseArgument(node) {
@@ -291,6 +286,9 @@ function _parseArgument(node) {
 function _parseType(node) {
     const typeNode = node.childForFieldName('type');
 
+    if (!typeNode) {
+        return null;
+    }
     if (typeNode.type === 'template_type') {
         return _parseTemplateType(node);
     }
@@ -363,7 +361,7 @@ function _parseTemplateType(node) {
     };
 }
 
-function _parseProperty(node) {
+function _parseProperty(node, object) {
     let comment = node.nextSibling?.text;
     let offset = null;
 
@@ -384,7 +382,7 @@ function _parseProperty(node) {
     if (Number.isInteger(offset)) {
         property.offset = offset;
     }
-    return property;
+    object.properties.push(property);
 }
 
 function _cleanObject(object) {
@@ -420,7 +418,7 @@ function _isDtor(node) {
 }
 
 function _isMethod(node) {
-    if (node.type === 'function_declarator') {
+    if (node.type === 'function_declarator' || node.type === 'function_definition') {
         return true;
     }
     const decl = node.childForFieldName('declarator');
@@ -447,6 +445,17 @@ function _findObjectInheritance(node) {
         }
     }
     return null;
+}
+
+function _findComment(node) {
+    for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+
+        if (child.type === 'comment') {
+            return child;
+        }
+    }
+    return node.nextSibling;
 }
 
 function _toList(node) {
