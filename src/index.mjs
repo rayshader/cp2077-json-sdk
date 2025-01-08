@@ -79,7 +79,7 @@ if (errors === 0) {
     warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
 }
 
-const count = types.flatMap(type => type.objects).length;
+const count = types.flatMap(type => type.objects).flatMap(type => type.objects).length;
 
 info(`Writing AST to JSON format for ${chalk.bold(count)} type${count > 1 ? 's' : ''}...`, false);
 
