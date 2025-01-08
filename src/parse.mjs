@@ -2,7 +2,7 @@ import fs from "fs";
 import Parser from "tree-sitter";
 import GrammarCPP from "tree-sitter-cpp";
 
-import {print, debug, error, nicePath} from "./logger.mjs";
+import {error, nicePath, print} from "./logger.mjs";
 
 const parser = new Parser();
 parser.setLanguage(GrammarCPP);
@@ -84,7 +84,6 @@ function _parseNode(node, parent) {
             return ns;
         }
         // TODO: support templates on struct/class
-        //       support multiple inheritance
         case 'struct_specifier':
         case 'class_specifier': {
             const it = _parseObject(node);
@@ -94,14 +93,17 @@ function _parseNode(node, parent) {
                     parent[key] = it.data[key];
                 }
                 _parseNodes(it.next, parent);
+                _cleanObject(it.data);
                 return it.data;
             }
             break;
         }
         case 'declaration': {
-            // TODO: ctor / dtor
-            // (declaration declarator: (function_declarator declarator: (identifier) parameters: (parameter_list)))
-            // (declaration declarator: (function_declarator declarator: (destructor_name (identifier)) parameters: (parameter_list) (virtual_specifier)))
+            if (_isDtor(node, parent)) {
+                _parseDtor(node, parent);
+            } else if (_isCtor(node, parent)) {
+                _parseCtor(node, parent);
+            }
             break;
         }
         case 'field_declaration': {
@@ -117,11 +119,10 @@ function _parseNode(node, parent) {
 
                 parent.properties.push(property);
             }
-            /*else {
-                debug('what:');
-                debug(decl);
-            }
-            */
+            /*
+            debug('what:');
+            debug(decl);
+            //*/
             break;
         }
         case 'function_declarator': {
@@ -130,13 +131,18 @@ function _parseNode(node, parent) {
             parent.methods.push(method);
             break;
         }
+        case 'function_definition': {
+            if (_isDtor(node, parent)) {
+                _parseDtor(node, parent);
+            }
+            break;
+        }
         default: {
             /*
-            else {
-                debug('unknown:');
-                debug(node);
-            }
-            */
+            debug('unknown:');
+            debug(node);
+            debug(node.text);
+            //*/
             break;
         }
     }
@@ -156,7 +162,8 @@ function _parseNamespace(node) {
 function _parseObject(node) {
     const type = node.type === 'struct_specifier' ? 'struct' : 'class';
     const name = node.firstNamedChild.text;
-    const body = _findObjectBody(node);
+    const parent = _findObjectInheritance(node);
+    const body = node.childForFieldName('body');
 
     if (!body) {
         return null;
@@ -164,6 +171,9 @@ function _parseObject(node) {
     const object = {
         type: type,
         name: name,
+        inherit: parent?.child(1)?.text ?? null,
+        ctors: [],
+        dtor: {},
         methods: [],
         properties: []
     };
@@ -172,6 +182,47 @@ function _parseObject(node) {
         data: object,
         next: body
     };
+}
+
+function _parseCtor(node, object) {
+    const decl = node.childForFieldName('declarator');
+    //const args = decl.childForFieldName('parameters');
+
+    // NOTE: empty object for default constructor.
+    const ctor = {};
+
+    /* TODO: add arguments list
+    for (let i = 0; i < args.childCount; i++) {
+    }
+    */
+    object.ctors.push(ctor);
+}
+
+function _parseDtor(node, object) {
+    let comment = node.nextSibling?.text;
+    let offset = null;
+
+    if (comment) {
+        comment = comment.trim().replace('//', '');
+        offset = Number.parseInt(comment, 16);
+    }
+    const isVirtual = node.text.startsWith('virtual');
+    const isOverride = node.text.endsWith('override;');
+    const isDefault = node.text.endsWith('default;');
+    const dtor = object.dtor;
+
+    if (isVirtual) {
+        dtor.virtual = true;
+    }
+    if (isOverride) {
+        dtor.override = true;
+    }
+    if (isDefault) {
+        dtor.default = true;
+    }
+    if (offset !== null) {
+        dtor.offset = offset;
+    }
 }
 
 function _parseMethod(node, object) {
@@ -336,6 +387,38 @@ function _parseProperty(node) {
     return property;
 }
 
+function _cleanObject(object) {
+    if (object.inherit === null) {
+        delete object.inherit;
+    }
+    if (object.ctors.length === 0) {
+        delete object.ctors;
+    }
+    if (Object.keys(object.dtor).length === 0) {
+        delete object.dtor;
+    }
+    if (object.methods.length === 0) {
+        delete object.methods;
+    }
+    if (object.properties.length === 0) {
+        delete object.properties;
+    }
+}
+
+function _isCtor(node, object) {
+    let decl = node.childForFieldName('declarator');
+
+    decl = decl.childForFieldName('declarator');
+    return decl.text === object.name;
+}
+
+function _isDtor(node) {
+    let decl = node.childForFieldName('declarator');
+
+    decl = decl.childForFieldName('declarator');
+    return decl?.type === 'destructor_name';
+}
+
 function _isMethod(node) {
     if (node.type === 'function_declarator') {
         return true;
@@ -355,11 +438,11 @@ function _isVoid(type) {
     return type.name === 'void' && !type.ptr && !type.ref;
 }
 
-function _findObjectBody(node) {
-    for (let i = 0; i < node.namedChildCount; i++) {
-        const child = node.namedChild(i);
+function _findObjectInheritance(node) {
+    for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
 
-        if (child.type === 'field_declaration_list') {
+        if (child.type === 'base_class_clause') {
             return child;
         }
     }
