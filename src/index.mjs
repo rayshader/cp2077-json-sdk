@@ -4,7 +4,7 @@ import chalk from "chalk";
 import {z} from "zod";
 import {parser as cliParser} from "zod-opts";
 
-import {debug, print, error, info, nicePath, formatTime} from "./logger.mjs";
+import {debug, print, error, info, nicePath, formatTime, warn} from "./logger.mjs";
 import {parse} from "./parse.mjs";
 import {traverse} from "./traverse.mjs";
 
@@ -53,6 +53,10 @@ if (!fs.existsSync(outputPath)) {
     process.exit(0);
 }
 
+const printOK = () => {
+    print(chalk.bold.green(' OK'));
+};
+
 const startAt = Date.now();
 info(`Listing all source files in ${nicePath(srcPath)}...`, false);
 /*
@@ -63,15 +67,16 @@ const files = [
 */
 const files = traverse(srcPath);
 
-print(chalk.green(' OK'));
+printOK();
 
 info(`Parsing ${chalk.bold(files.length)} source file${files.length > 1 ? 's' : ''}...`, false);
 const {types, errors} = parse(files);
 
 if (errors === 0) {
-    print(chalk.green(' OK'));
+    printOK();
 } else {
-    info(`Run with option ${chalk.bold('--verbose')} for more details.`);
+    warn(`Failed to parse ${chalk.bold(errors)} source file${errors > 1 ? 's' : ''}.`);
+    warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
 }
 
 const count = types.flatMap(type => type.objects).length;
@@ -104,7 +109,7 @@ types.forEach(type => {
     fs.writeFileSync(filePath, data, {encoding: 'utf8'});
 })
 
-print(chalk.green(' OK'));
+printOK();
 
 const elapsedTime = Date.now() - startAt;
 

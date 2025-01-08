@@ -27,6 +27,15 @@ export const error = (msg, withNewline = true) => {
     ctx = 'stderr';
 };
 
+export const warn = (msg, withNewline = true) => {
+    msg = chalk.bold.yellow('[warn] ') + msg;
+    if (withNewline) {
+        msg += '\n';
+    }
+    process.stdout.write(msg);
+    ctx = 'stdout';
+}
+
 export const info = (msg, withNewline = true) => {
     msg = chalk.bold.blue('[info] ') + msg;
     if (withNewline) {
@@ -45,7 +54,7 @@ export const debug = (msg, withNewline = true) => {
     ctx = 'stdout';
 }
 
-export const nicePath = (path) => chalk.green(`"${path}"`);
+export const nicePath = (path) => chalk.bold.green(`"${path}"`);
 
 export const formatTime = (time) => {
     const milliseconds = Math.trunc(time % 1000);
