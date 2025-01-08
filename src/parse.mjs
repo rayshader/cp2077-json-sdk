@@ -81,6 +81,7 @@ function _parseNode(node, parent) {
             return ns;
         }
         // TODO: support templates on struct/class
+        //       support enum class
         case 'struct_specifier':
         case 'class_specifier': {
             const it = _parseObject(node);
@@ -104,6 +105,15 @@ function _parseNode(node, parent) {
             break;
         }
         case 'field_declaration': {
+            if (_isStructNested(node)) {
+                const decl = node.childForFieldName('type');
+                const object = _parseNode(decl, {});
+
+                if (object) {
+                    parent.nested.push(object);
+                }
+                break;
+            }
             const decl = node.childForFieldName('declarator');
 
             if (_isMethod(decl)) {
@@ -164,6 +174,7 @@ function _parseObject(node) {
         type: type,
         name: name,
         inherit: parent?.child(1)?.text ?? null,
+        nested: [],
         ctors: [],
         dtor: {},
         methods: [],
@@ -389,6 +400,9 @@ function _cleanObject(object) {
     if (object.inherit === null) {
         delete object.inherit;
     }
+    if (object.nested.length === 0) {
+        delete object.nested;
+    }
     if (object.ctors.length === 0) {
         delete object.ctors;
     }
@@ -401,6 +415,10 @@ function _cleanObject(object) {
     if (object.properties.length === 0) {
         delete object.properties;
     }
+}
+
+function _isStructNested(node) {
+    return node.firstNamedChild?.type === 'struct_specifier';
 }
 
 function _isCtor(node, object) {
