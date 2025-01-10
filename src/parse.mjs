@@ -211,6 +211,9 @@ function _parseConstant(node, parent) {
 }
 
 function _parseCtor(node, object) {
+    if (!object.ctors) {
+        return;
+    }
     const decl = node.childForFieldName('declarator');
     //const args = decl.childForFieldName('parameters');
 
@@ -252,6 +255,9 @@ function _parseDtor(node, object) {
 }
 
 function _parseMethod(node, object) {
+    if (!object.methods) {
+        return;
+    }
     let commentNode = _findComment(node);
     let comment = commentNode?.text;
     let offset = null;
@@ -469,7 +475,7 @@ function _isCtor(node, object) {
     let decl = node.childForFieldName('declarator');
 
     decl = decl.childForFieldName('declarator');
-    return decl.text === object.name;
+    return decl?.text === object.name;
 }
 
 function _isDtor(node) {
