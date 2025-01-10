@@ -168,7 +168,7 @@ function _parseNamespace(node) {
 
 function _parseObject(node) {
     const type = node.type === 'struct_specifier' ? 'struct' : 'class';
-    const name = node.firstNamedChild.text;
+    const name = node.childForFieldName('name').text;
     const parent = _findObjectInheritance(node);
     const body = node.childForFieldName('body');
 
@@ -323,7 +323,7 @@ function _parseArgument(node) {
 
     return {
         type: it.data,
-        name: it.next.text,
+        name: it.next?.text,
     };
 }
 
@@ -410,8 +410,16 @@ function _parseTemplateType(node, constants) {
         name: name.text,
         templates: templates,
     };
-    const decl = node.childForFieldName('declarator');
+    let decl = node.childForFieldName('declarator');
 
+    if (decl?.type === 'pointer_declarator') {
+        templateType.ptr = true;
+        decl = decl.child(1);
+    }
+    if (decl?.type === 'reference_declarator') {
+        templateType.ref = true;
+        decl = decl.child(1);
+    }
     return {
         data: templateType,
         next: decl
