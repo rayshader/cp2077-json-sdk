@@ -107,7 +107,7 @@ function _parseNode(node, parent) {
         case 'field_declaration': {
             const defaultDecl = node.childForFieldName('default_value');
 
-            if (defaultDecl) {
+            if (defaultDecl && node.text.includes('static constexpr')) {
                 _parseConstant(node, parent);
             }
             if (_isStructNested(node)) {
