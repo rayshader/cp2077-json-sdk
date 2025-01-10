@@ -13,7 +13,7 @@ const opts = cliParser()
     .version('1.0.0')
     .options({
         sdk: {
-            type: z.string().describe('Path to RED4ext.SDK.'),
+            type: z.string().describe('Path to RED4ext.SDK.').default('sdk'),
             alias: 'src'
         },
         output: {
