@@ -262,7 +262,7 @@ function _parseMethod(node, object) {
     let comment = commentNode?.text;
     let offset = null;
 
-    if (comment) {
+    if (comment && comment.includes('//')) {
         comment = comment.trim().replace('//', '');
         offset = Number.parseInt(comment, 16);
     }
