@@ -105,6 +105,11 @@ function _parseNode(node, parent) {
             break;
         }
         case 'field_declaration': {
+            const defaultDecl = node.childForFieldName('default_value');
+
+            if (defaultDecl) {
+                _parseConstant(node, parent);
+            }
             if (_isStructNested(node)) {
                 const decl = node.childForFieldName('type');
                 const object = _parseNode(decl, {});
@@ -174,6 +179,7 @@ function _parseObject(node) {
         type: type,
         name: name,
         inherit: parent?.child(1)?.text ?? null,
+        constants: [],
         nested: [],
         ctors: [],
         dtor: {},
@@ -185,6 +191,23 @@ function _parseObject(node) {
         data: object,
         next: body
     };
+}
+
+function _parseConstant(node, parent) {
+    const defaultDecl = node.childForFieldName('default_value');
+    const decl = node.childForFieldName('declarator');
+    const name = decl.text;
+    let value = defaultDecl.text;
+
+    if (defaultDecl.type === 'number_literal') {
+        value = +value;
+    }
+    /*
+    else {
+        throw new Error(`No implementation to parse default value of type ${defaultDecl.type}.`);
+    }
+    */
+    parent.constants.push({name: name, value: value});
 }
 
 function _parseCtor(node, object) {
@@ -247,6 +270,10 @@ function _parseMethod(node, object) {
     const isVirtual = node.text.startsWith('virtual');
     const isOverride = node.text.includes('override');
     const isPure = node.text.endsWith(' = 0;');
+
+    if (!decl) {
+        return;
+    }
     const name = decl.childForFieldName('declarator')?.text;
 
     if (!name) {
@@ -294,14 +321,20 @@ function _parseArgument(node) {
     };
 }
 
-function _parseType(node) {
+function _parseType(node, constants) {
+    constants ??= [];
     const typeNode = node.childForFieldName('type');
 
     if (!typeNode) {
-        return null;
+        // NOTE: expect 'number_literal' only.
+        return {
+            data: {
+                value: +node.text
+            }
+        };
     }
     if (typeNode.type === 'template_type') {
-        return _parseTemplateType(node);
+        return _parseTemplateType(node, constants);
     }
     const name = typeNode.text;
     let decl = node.childForFieldName('declarator');
@@ -315,8 +348,14 @@ function _parseType(node) {
     }
     if (decl?.type === 'array_declarator') {
         const sizeNode = decl.childForFieldName('size');
+        let text = sizeNode.text;
 
-        fixedArraySize = eval(sizeNode.text);
+        for (const constant of constants) {
+            if (text.includes(constant.name)) {
+                text = text.replace(constant.name, constant.value);
+            }
+        }
+        fixedArraySize = eval(text);
         decl = decl.firstNamedChild;
     }
     if (decl?.type === 'pointer_declarator') {
@@ -349,13 +388,14 @@ function _parseType(node) {
     };
 }
 
-function _parseTemplateType(node) {
+function _parseTemplateType(node, constants) {
     const type = node.childForFieldName('type');
     const args = type.childForFieldName('arguments');
     const templates = [];
 
     for (let i = 0; i < args.namedChildCount; i++) {
-        const template = _parseType(args.namedChild(i));
+        const child = args.namedChild(i);
+        const template = _parseType(child, constants);
 
         templates.push(template.data);
     }
@@ -380,7 +420,7 @@ function _parseProperty(node, object) {
         comment = comment.trim().replace('//', '');
         offset = Number.parseInt(comment, 16);
     }
-    const it = _parseType(node);
+    const it = _parseType(node, object.constants);
     const type = it.data;
     const decl = it.next;
 
@@ -411,9 +451,13 @@ function _cleanObject(object) {
     }
     if (object.methods.length === 0) {
         delete object.methods;
+    } else {
+        object.methods = object.methods.filter(method => method.offset !== undefined);
     }
     if (object.properties.length === 0) {
         delete object.properties;
+    } else {
+        object.properties = object.properties.filter(property => property.offset !== undefined);
     }
 }
 
