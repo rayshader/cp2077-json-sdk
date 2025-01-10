@@ -76,7 +76,9 @@ if (errors === 0) {
     printOK();
 } else {
     warn(`Failed to parse ${chalk.bold(errors)} source file${errors > 1 ? 's' : ''}.`);
-    warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
+    if (!verbose) {
+        warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
+    }
 }
 
 const count = types.flatMap(type => type.objects).flatMap(type => type.objects).length;
