@@ -81,7 +81,13 @@ if (errors === 0) {
     }
 }
 
-const count = types.flatMap(type => type.objects).flatMap(type => type.objects).length;
+const flattenObjects = (type) => {
+    if (!type.objects) {
+        return [];
+    }
+    return [...type.objects, type.objects.flatMap(flattenObjects)];
+};
+const count = types.flatMap(flattenObjects).length;
 
 info(`Writing AST to JSON format for ${chalk.bold(count)} type${count > 1 ? 's' : ''}...`, false);
 
