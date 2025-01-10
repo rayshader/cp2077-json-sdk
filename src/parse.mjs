@@ -454,6 +454,10 @@ function _cleanObject(object) {
     if (object.inherit === null) {
         delete object.inherit;
     }
+    object.constants = object.constants.filter(type => type.name !== '* NAME' && type.name !== '* ALIAS');
+    if (object.constants.length === 0) {
+        delete object.constants;
+    }
     if (object.nested.length === 0) {
         delete object.nested;
     }
