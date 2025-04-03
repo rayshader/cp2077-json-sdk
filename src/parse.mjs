@@ -370,12 +370,16 @@ function _parseType(node, constants) {
     const name = typeNode.text;
     let decl = node.childForFieldName('declarator');
     let fixedArraySize = 0;
+    let isVolatile = false;
     let isConst = false;
     let isPtr = false;
     let isRef = false;
 
     if (node.firstNamedChild.text === 'const') {
         isConst = true;
+    }
+    if (node.firstNamedChild.text === 'volatile') {
+        isVolatile = true;
     }
     if (decl?.type === 'array_declarator') {
         const sizeNode = decl.childForFieldName('size');
@@ -399,7 +403,9 @@ function _parseType(node, constants) {
     }
     const type = {};
 
-    // TODO: const/volatile/etc.
+    if (isVolatile) {
+        type.volatile = true;
+    }
     if (isConst) {
         type.const = true;
     }
