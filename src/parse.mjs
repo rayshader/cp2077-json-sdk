@@ -91,8 +91,6 @@ function _parseNode(node, parent) {
             }
             break;
         }
-        // TODO: support templates on struct/class
-        //       support enum class
         case 'struct_specifier':
         case 'class_specifier': {
             const it = _parseObject(node);
@@ -124,6 +122,15 @@ function _parseNode(node, parent) {
             if (_isStructNested(node)) {
                 const decl = node.childForFieldName('type');
                 const object = _parseNode(decl, {});
+
+                if (object) {
+                    parent.nested.push(object);
+                }
+                break;
+            }
+            if (_isEnumNested(node)) {
+                const decl = node.childForFieldName('type');
+                const object = _parseEnum(decl, {});
 
                 if (object) {
                     parent.nested.push(object);
@@ -214,6 +221,33 @@ function _parseObject(node) {
         data: object,
         next: body
     };
+}
+
+function _parseEnum(node) {
+    const object = {
+        type: 'enum',
+        primitive: node.childForFieldName('base').text,
+        name: node.childForFieldName('name').text,
+        values: []
+    };
+    const body = node.childForFieldName('body');
+
+    for (let i = 1; i < body.childCount - 1; i++) {
+        const item = body.child(i);
+        const name = item.childForFieldName('name').text;
+        const value = item.childForFieldName('value');
+        let computed = 0;
+
+        if (value.type === 'binary_expression') {
+            computed = +value.childForFieldName('left').text;
+            computed <<= +value.childForFieldName('right').text;
+        }
+        object.values.push({
+           name: name,
+           value: computed,
+        });
+    }
+    return object;
 }
 
 function _parseConstant(node, parent) {
@@ -511,6 +545,10 @@ function _cleanObject(object) {
 
 function _isStructNested(node) {
     return node.firstNamedChild?.type === 'struct_specifier';
+}
+
+function _isEnumNested(node) {
+    return node.firstNamedChild?.type === 'enum_specifier';
 }
 
 function _isCtor(node, object) {
