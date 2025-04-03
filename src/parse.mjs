@@ -80,6 +80,17 @@ function _parseNode(node, parent) {
             ns.objects.push(...objects);
             return ns;
         }
+        case 'template_declaration': {
+            const it = _parseTemplate(node);
+
+            if (it && parent) {
+                _parseNode(it.next, it.data);
+                if ('name' in it.data) {
+                    return it.data;
+                }
+            }
+            break;
+        }
         // TODO: support templates on struct/class
         //       support enum class
         case 'struct_specifier':
@@ -166,6 +177,16 @@ function _parseNamespace(node) {
     };
 }
 
+function _parseTemplate(node) {
+    //const params = node.childForFieldName('parameters');
+    return {
+        data: {
+            templates: ['T'],
+        },
+        next: node.child(2)
+    };
+}
+
 function _parseObject(node) {
     const type = node.type === 'struct_specifier' ? 'struct' : 'class';
     const name = node.childForFieldName('name').text;
@@ -175,10 +196,12 @@ function _parseObject(node) {
     if (!body) {
         return null;
     }
+    const inherit = _formatInheritance(parent);
+
     const object = {
         type: type,
         name: name,
-        inherit: parent?.child(1)?.text ?? null,
+        inherit: inherit,
         constants: [],
         nested: [],
         ctors: [],
@@ -265,6 +288,8 @@ function _parseMethod(node, object) {
     if (comment && comment.includes('//')) {
         comment = comment.trim().replace('//', '');
         offset = Number.parseInt(comment, 16);
+    } else {
+        return;
     }
     const it = _parseType(node);
 
@@ -437,7 +462,6 @@ function _parseProperty(node, object) {
     const it = _parseType(node, object.constants);
     const type = it.data;
     const decl = it.next;
-
     const property = {};
 
     if (!_isVoid(type)) {
@@ -498,6 +522,9 @@ function _isDtor(node) {
 }
 
 function _isMethod(node) {
+    if (!node) {
+        return false;
+    }
     if (node.type === 'function_declarator' || node.type === 'function_definition') {
         return true;
     }
@@ -536,6 +563,24 @@ function _findComment(node) {
         }
     }
     return node.nextSibling;
+}
+
+function _formatInheritance(node) {
+    if (!node) {
+        return null;
+    }
+    const child = node.child(1);
+
+    if (child.type !== 'access_specifier') {
+        return child.text;
+    }
+    const template = node.child(2);
+    const args = template.childForFieldName('arguments');
+
+    return {
+        template: template.childForFieldName('name').text,
+        type: args.namedChild(0).childForFieldName('type').text
+    };
 }
 
 function _toList(node) {
