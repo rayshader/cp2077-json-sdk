@@ -78,6 +78,7 @@ const files = [
     //join(srcPath, 'Map.hpp'),
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'EMeshChunkFlags.hpp'),
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ECookingPlatform.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ETextureCompression.hpp'),
     //join(srcPath, 'ResourceDepot.hpp'),
     //join(srcPath, 'Scripting', 'Natives', 'gameIEntityStubSystem.hpp'),
 ];

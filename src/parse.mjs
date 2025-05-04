@@ -246,11 +246,13 @@ function _parseEnum(node) {
         const value = item.childForFieldName('value');
         let computed = 0;
 
-        if (value?.type === 'binary_expression') {
+        if (value?.type === 'number_literal') {
+            computed = +value.text;
+        } else if (value?.type === 'identifier') {
+            computed = object.values.find((v) => v.name === value.text).value;
+        } else if (value?.type === 'binary_expression') {
             computed = +value.childForFieldName('left').text;
             computed <<= +value.childForFieldName('right').text;
-        } else if (value) {
-            computed = +value.text;
         } else {
             computed = enumValue;
             enumValue++;
