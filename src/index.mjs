@@ -61,11 +61,35 @@ const startAt = Date.now();
 info(`Listing all source files in ${nicePath(srcPath)}...`, false);
 /*
 const files = [
-    //join(srcPath, 'Scripting', 'IScriptable.hpp'), // OK
-    join(srcPath, 'ISerializable.hpp'),
+    //join(srcPath, 'Scripting', 'IScriptable.hpp'),
+    //join(srcPath, 'Scripting', 'Stack.hpp'),
+    //join(srcPath, 'ISerializable.hpp'),
+    //join(srcPath, 'CName.hpp'),
+    //join(srcPath, 'GameEngine.hpp'),
+    //join(srcPath, 'LaunchParameters.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'move', 'Policies.hpp'),
+    //join(srcPath, 'Hashing', 'CRC.hpp'),
+    //join(srcPath, 'Memory', 'Pool.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'Vector4.hpp'),
+    //join(srcPath, 'RTTISystem.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'game', 'weapon', 'Grenade.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
+    //join(srcPath, 'Memory', 'SharedPtr.hpp'),
+    //join(srcPath, 'Map.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'EMeshChunkFlags.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ECookingPlatform.hpp'),
+    //join(srcPath, 'ResourceDepot.hpp'),
+    //join(srcPath, 'Scripting', 'Natives', 'gameIEntityStubSystem.hpp'),
 ];
-*/
-const files = traverse(srcPath);
+//*/
+//*
+const files = traverse(srcPath).filter(path => {
+    if (path.includes(join('include', 'RED4ext', 'Api'))) {
+        return false;
+    }
+    return true;
+});
+//*/
 
 printOK();
 
@@ -91,6 +115,8 @@ const count = types.flatMap(flattenObjects).length;
 
 info(`Writing AST to JSON format for ${chalk.bold(count)} type${count > 1 ? 's' : ''}...`, false);
 
+let ignore = 0;
+
 types.forEach(type => {
     const objects = type.objects;
     let data = '';
@@ -109,6 +135,16 @@ types.forEach(type => {
     const filePath = join(outputPath, relativePath).replace('.hpp', '.json');
     const dirPath = dirname(filePath);
 
+    if (!data || data.length === 0) {
+        if (verbose) {
+            if (ignore === 0) {
+                print('');
+            }
+            info(`Ignore empty file ${nicePath(join(outputPath, relativePath))}.`);
+            ignore++;
+        }
+        return;
+    }
     try {
         fs.mkdirSync(dirPath, {recursive: true});
     } catch (_) {
@@ -117,7 +153,9 @@ types.forEach(type => {
     fs.writeFileSync(filePath, data, {encoding: 'utf8'});
 })
 
-printOK();
+if (ignore === 0) {
+    printOK();
+}
 
 const elapsedTime = Date.now() - startAt;
 

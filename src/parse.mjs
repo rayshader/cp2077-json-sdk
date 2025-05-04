@@ -96,14 +96,17 @@ function _parseNode(node, parent) {
             const it = _parseObject(node);
 
             if (it && parent) {
-                for (const key of Object.keys(it.data)) {
-                    parent[key] = it.data[key];
+                for (const key of Object.keys(parent)) {
+                    it.data[key] = parent[key];
                 }
-                _parseNodes(it.next, parent);
+                _parseNodes(it.next, it.data);
                 _cleanObject(it.data);
                 return it.data;
             }
             break;
+        }
+        case 'enum_specifier': {
+            return _parseEnum(node, {});
         }
         case 'declaration': {
             if (_isDtor(node, parent)) {
@@ -231,16 +234,26 @@ function _parseEnum(node) {
         values: []
     };
     const body = node.childForFieldName('body');
+    let enumValue = 0;
 
     for (let i = 1; i < body.childCount - 1; i++) {
         const item = body.child(i);
+
+        if (item.type === ',' || item.type === 'comment') {
+            continue;
+        }
         const name = item.childForFieldName('name').text;
         const value = item.childForFieldName('value');
         let computed = 0;
 
-        if (value.type === 'binary_expression') {
+        if (value?.type === 'binary_expression') {
             computed = +value.childForFieldName('left').text;
             computed <<= +value.childForFieldName('right').text;
+        } else if (value) {
+            computed = +value.text;
+        } else {
+            computed = enumValue;
+            enumValue++;
         }
         object.values.push({
            name: name,
@@ -404,10 +417,16 @@ function _parseType(node, constants) {
     const name = typeNode.text;
     let decl = node.childForFieldName('declarator');
     let fixedArraySize = 0;
+    let bitfieldValue = null;
     let isVolatile = false;
     let isConst = false;
     let isPtr = false;
     let isRef = false;
+
+    const bitfield = node.child(2);
+    if (bitfield && bitfield.type === 'bitfield_clause') {
+        bitfieldValue = +bitfield.child(1).text;
+    }
 
     if (node.firstNamedChild.text === 'const') {
         isConst = true;
@@ -452,6 +471,9 @@ function _parseType(node, constants) {
     }
     if (isRef) {
         type.ref = true;
+    }
+    if (bitfieldValue) {
+        type.bitfield = bitfieldValue;
     }
     return {
         data: type,
@@ -511,6 +533,9 @@ function _parseProperty(node, object) {
     if (Number.isInteger(offset)) {
         property.offset = offset;
     }
+    if ('bitfield' in property.type) {
+        object.type = 'bitfield';
+    }
     object.properties.push(property);
 }
 
@@ -538,9 +563,12 @@ function _cleanObject(object) {
     }
     if (object.properties.length === 0) {
         delete object.properties;
-    } else {
+    }
+    /*
+    else {
         object.properties = object.properties.filter(property => property.offset !== undefined);
     }
+    */
 }
 
 function _isStructNested(node) {
