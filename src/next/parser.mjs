@@ -345,11 +345,9 @@ function parsePrimitiveType(ast, stack, node, extra) {
 function parseTemplateType(ast, stack, node) {
     const parent = getAstParent(ast);
 
-    const name = node.childForFieldName('name');
     const args = node.childForFieldName('arguments');
-
-    const templates = [];
     const descriptors = findChildrenByType(args, 'type_descriptor');
+    const templates = [];
     for (const descriptor of descriptors) {
         const type = descriptor.childForFieldName('type');
         const decl = descriptor.childForFieldName('declarator');
@@ -361,6 +359,7 @@ function parseTemplateType(ast, stack, node) {
         stack.push({node: type, extra: decl ? [decl] : null});
     }
 
+    const name = node.childForFieldName('name');
     parent.name = name.text;
     parent.templates = templates;
 }
