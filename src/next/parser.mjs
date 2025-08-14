@@ -315,7 +315,7 @@ function parseType(ast, stack, node, extra) {
     const parent = getAstParent(ast);
     parent.name = node.text;
 
-    parseExtraType(parent, extra);
+    parseDeclarators(parent, extra);
 }
 
 /**
@@ -329,7 +329,7 @@ function parsePrimitiveType(ast, stack, node, extra) {
     const parent = getAstParent(ast);
     parent.name = node.text;
 
-    parseExtraType(parent, extra);
+    parseDeclarators(parent, extra);
 }
 
 /**
@@ -368,13 +368,13 @@ function parseTemplateType(ast, stack, node) {
 /**
  * Parse pointer and reference declarators.
  */
-function parseExtraType(node, extra) {
-    if (!extra) {
+function parseDeclarators(node, declarators) {
+    if (!declarators) {
         return;
     }
 
-    for (const decl of extra) {
-        switch (decl.type) {
+    for (const declarator of declarators) {
+        switch (declarator.type) {
             case 'abstract_pointer_declarator':
             case 'pointer_declarator':
                 node.ptr = true;
