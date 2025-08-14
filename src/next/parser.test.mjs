@@ -35,6 +35,8 @@ describe('struct', () => {
             'type': 'struct',
             'name': 'GameApp',
             'fields': [
+                {'name': 'kMode', 'type': {'static': true, 'constexpr': true, 'const': true, 'name': 'bool'}},
+
                 {'offset': 0, 'name': 'isRunning', 'type': {'name': 'bool'}},
                 {'offset': 4, 'name': 'delta', 'type': {'name': 'float'}},
                 {'offset': 8, 'name': 'context', 'type': {'name': 'void', 'ptr': true}},
@@ -44,7 +46,8 @@ describe('struct', () => {
 
                 {'name': 'pool', 'type': {'name': 'HashMap', 'templates': [{'name': 'uint64_t'}, {'name': 'CString'}]}},
 
-                {'name': 'components',
+                {
+                    'name': 'components',
                     'type': {
                         'name': 'DynArray',
                         'templates': [{'name': 'Handle', 'templates': [{'name': 'void', 'ptr': true}]}]

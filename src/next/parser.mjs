@@ -295,7 +295,6 @@ function parseFieldDeclaration(ast, stack, node, extra) {
 
     const declarators = findDeclarators(node);
     const name = findChildByType(decl, 'field_identifier');
-    const storage = findChildByType(node, 'storage_class_specifier');
     const qualifiers = findChildrenByType(node, 'type_qualifier');
 
     const field = {};
@@ -308,6 +307,14 @@ function parseFieldDeclaration(ast, stack, node, extra) {
     }
 
     field.type = {};
+
+    const storage = findChildByType(node, 'storage_class_specifier');
+    if (storage) {
+        field.type.static = true;
+    }
+
+    parseQualifiers(field.type, qualifiers);
+
     field.name = name ? name.text : decl.text;
 
     const parent = getAstParent(ast);
@@ -387,6 +394,30 @@ function parseDeclarators(node, declarators) {
                 break;
             case 'reference_declarator':
                 node.ref = true;
+                break;
+        }
+    }
+}
+
+/**
+ * Parse constexpr, const and volatile qualifiers.
+ */
+function parseQualifiers(node, qualifiers) {
+    if (!qualifiers) {
+        return;
+    }
+
+    for (const qualifier of qualifiers) {
+        switch (qualifier.text) {
+            case 'constexpr':
+                // TODO: extract default value.
+                node.constexpr = true;
+                break;
+            case 'const':
+                node.const = true;
+                break;
+            case 'volatile':
+                node.volatile = true;
                 break;
         }
     }
