@@ -83,7 +83,7 @@ function canParse(type) {
 
 /**
  * @param ast {AstNodeIterator[]}
- * @returns {AstNodeIterator}
+ * @returns {object[]}
  */
 function getAstParent(ast) {
     return ast.length === 0 ? null : ast[ast.length - 1];
@@ -198,7 +198,7 @@ function parseNamespace(ast, stack, node) {
     };
 
     const parent = getAstParent(ast);
-    parent.push(namespace);
+    parent.splice(0, 0, namespace);
 
     ast.push(namespace.children);
 
@@ -242,7 +242,7 @@ function parseStruct(ast, stack, node) {
     };
 
     const parent = getAstParent(ast);
-    parent.push(struct);
+    parent.splice(0, 0, struct);
 
     ast.push(struct.fields);
     stack.push({pop: true});
@@ -304,7 +304,7 @@ function parseFieldDeclaration(ast, stack, node, extra) {
     };
 
     const parent = getAstParent(ast);
-    parent.push(field);
+    parent.splice(0, 0, field);
 
     ast.push(field.type);
     stack.push({pop: true});

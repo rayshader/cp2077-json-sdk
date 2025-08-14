@@ -12,7 +12,7 @@ describe('struct', () => {
     it('should parse empty structs', () => {
         const ast = parseHeader(read('tests/struct_empty.hpp'));
 
-        expect(ast).toEqual(expect.arrayContaining([
+        expect(ast).toEqual([
             {
                 'type': 'struct',
                 'name': 'GameApp',
@@ -23,7 +23,7 @@ describe('struct', () => {
                 'name': 'GameNetwork',
                 'fields': [],
             }
-        ]));
+        ]);
     });
 
     it('should parse struct and its fields', () => {
@@ -31,61 +31,66 @@ describe('struct', () => {
         expect(ast).toHaveLength(1);
 
         const struct = ast[0];
-        expect(struct).toEqual(expect.objectContaining({
+        expect(struct).toEqual({
             'type': 'struct',
             'name': 'GameApp',
-            'fields': expect.arrayContaining([
-                {'name': 'context', 'type': {'name': 'void', 'ptr': true}},
-                {'name': 'delta', 'type': {'name': 'float'}},
+            'fields': [
                 {'name': 'isRunning', 'type': {'name': 'bool'}},
+                {'name': 'delta', 'type': {'name': 'float'}},
+                {'name': 'context', 'type': {'name': 'void', 'ptr': true}},
 
                 {'name': 'buffer', 'type': {'name': 'DynArray', 'templates': [{'name': 'int32_t'}]}},
                 {'name': 'lines', 'type': {'name': 'DynArray', 'templates': [{'name': 'char', 'ptr': true}]}},
 
                 {'name': 'pool', 'type': {'name': 'HashMap', 'templates': [{'name': 'uint64_t'}, {'name': 'CString'}]}},
 
-                {'name': 'components', 'type': {'name': 'DynArray', 'templates': [{'name': 'Handle', 'templates': [{'name': 'void', 'ptr': true}]}]}},
-            ]),
-        }));
+                {'name': 'components',
+                    'type': {
+                        'name': 'DynArray',
+                        'templates': [{'name': 'Handle', 'templates': [{'name': 'void', 'ptr': true}]}]
+                    }
+                },
+            ],
+        });
     });
 
     it('should parse structs within a namespace', () => {
         const ast = parseHeader(read('tests/struct_namespace.hpp'));
 
-        expect(ast).toEqual(expect.arrayContaining([
-            expect.objectContaining({
+        expect(ast).toEqual([
+            {
                 'type': 'namespace',
                 'name': 'Awesome',
-                'children': expect.arrayContaining([
-                    expect.objectContaining({
+                'children': [
+                    {
                         'type': 'struct',
                         'name': 'GameApp',
                         'fields': [],
-                    }),
-                    expect.objectContaining({
+                    },
+                    {
                         'type': 'struct',
                         'name': 'GameNetwork',
                         'fields': [],
-                    }),
-                ])
-            }),
+                    },
+                ]
+            },
 
-            expect.objectContaining({
+            {
                 'type': 'namespace',
                 'name': 'Epsiloon',
-                'children': expect.arrayContaining([
-                    expect.objectContaining({
+                'children': [
+                    {
                         'type': 'struct',
                         'name': 'RendererSystem',
                         'fields': [],
-                    }),
-                    expect.objectContaining({
+                    },
+                    {
                         'type': 'struct',
                         'name': 'AudioSystem',
                         'fields': [],
-                    }),
-                ])
-            })
-        ]));
+                    },
+                ]
+            }
+        ]);
     });
 });
