@@ -35,9 +35,9 @@ describe('struct', () => {
             'type': 'struct',
             'name': 'GameApp',
             'fields': [
-                {'name': 'isRunning', 'type': {'name': 'bool'}},
-                {'name': 'delta', 'type': {'name': 'float'}},
-                {'name': 'context', 'type': {'name': 'void', 'ptr': true}},
+                {'offset': 0, 'name': 'isRunning', 'type': {'name': 'bool'}},
+                {'offset': 4, 'name': 'delta', 'type': {'name': 'float'}},
+                {'offset': 8, 'name': 'context', 'type': {'name': 'void', 'ptr': true}},
 
                 {'name': 'buffer', 'type': {'name': 'DynArray', 'templates': [{'name': 'int32_t'}]}},
                 {'name': 'lines', 'type': {'name': 'DynArray', 'templates': [{'name': 'char', 'ptr': true}]}},

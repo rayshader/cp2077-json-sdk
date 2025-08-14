@@ -295,13 +295,20 @@ function parseFieldDeclaration(ast, stack, node, extra) {
 
     const declarators = findDeclarators(node);
     const name = findChildByType(decl, 'field_identifier');
-
     const storage = findChildByType(node, 'storage_class_specifier');
     const qualifiers = findChildrenByType(node, 'type_qualifier');
-    const field = {
-        'type': {},
-        'name': name ? name.text : decl.text,
-    };
+
+    const field = {};
+    // NOTE: extract offset information from comment when present
+    if (extra && extra.type === 'comment') {
+        const match = extra.text.match(/\/\/ (?<offset>\d+)/);
+        if (match && match.groups.offset) {
+            field.offset = parseInt(match.groups.offset, 16);
+        }
+    }
+
+    field.type = {};
+    field.name = name ? name.text : decl.text;
 
     const parent = getAstParent(ast);
     parent.splice(0, 0, field);
