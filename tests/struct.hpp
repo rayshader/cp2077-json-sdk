@@ -9,4 +9,6 @@ struct GameApp {
   DynArray<char*> lines;
 
   HashMap<uint64_t, CString> pool;
+
+  DynArray<Handle<void*>> components;
 };

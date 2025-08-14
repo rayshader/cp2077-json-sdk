@@ -33,7 +33,6 @@ export function parse(files, verbose) {
 /**
  * @typedef AstNodeIterator
  * @type {object}
- * @property {object|array} node - JSON format of a TSNode.
  */
 
 /**
@@ -54,20 +53,22 @@ export function parseHeader(code) {
     /** @type {TSNodeIterator[]} */
     const stack = [];
 
+    // NOTE: root node of this AST document.
+    ast.push([]);
     stack.push({node: tree.rootNode});
     while (stack.length > 0) {
         parseNode(ast, stack);
     }
 
-    const root = ast?.[0]?.node;
+    //*
+    debug('AST JSON:');
+    debug(JSON.stringify(ast[0], null, 1));
+    //*/
+
+    const root = ast[0];
     if (!root) {
         return null;
     }
-
-    //*
-    debug('AST JSON:');
-    debug(JSON.stringify(root, null, 1));
-    //*/
 
     return root;
 }
@@ -84,7 +85,7 @@ function canParse(type) {
  * @param ast {AstNodeIterator[]}
  * @returns {AstNodeIterator}
  */
-function getAstCurrent(ast) {
+function getAstParent(ast) {
     return ast.length === 0 ? null : ast[ast.length - 1];
 }
 
@@ -196,12 +197,11 @@ function parseNamespace(ast, stack, node) {
         'children': []
     };
 
-    const it = getAstCurrent(ast);
-    it?.node.push({node: namespace});
-    it?.node.push({node: namespace.children});
+    const parent = getAstParent(ast);
+    parent.push(namespace);
 
-    ast.push({node: namespace});
-    ast.push({node: namespace.children});
+    ast.push(namespace.children);
+
     stack.push({pop: true});
     stack.push({node: body});
 }
@@ -241,10 +241,10 @@ function parseStruct(ast, stack, node) {
         'fields': []
     };
 
-    const it = getAstCurrent(ast);
-    it?.node.push(struct);
+    const parent = getAstParent(ast);
+    parent.push(struct);
 
-    ast.push({node: struct});
+    ast.push(struct.fields);
     stack.push({pop: true});
     stack.push({node: fields});
 }
@@ -255,10 +255,6 @@ function parseStruct(ast, stack, node) {
  * @param node {object}
  */
 function parseFieldDeclarationList(ast, stack, node) {
-    const it = getAstCurrent(ast);
-    ast.push({node: it.node.fields});
-    stack.push({pop: true});
-
     const size = node.children.length;
     for (let i = 0; i < size; i++) {
         const child = node.children[i];
@@ -307,22 +303,19 @@ function parseFieldDeclaration(ast, stack, node, extra) {
         'name': name ? name.text : decl.text,
     };
 
-    const it = getAstCurrent(ast);
-    it.node.push(field);
+    const parent = getAstParent(ast);
+    parent.push(field);
 
-    ast.push({node: field.type});
+    ast.push(field.type);
     stack.push({pop: true});
     stack.push({node: type, extra: declarators});
-
-    debug(node.children);
-    debug(`<field type="${type.text}" decl="${decl.text}" />`);
 }
 
 function parseType(ast, stack, node, extra) {
-    const it = getAstCurrent(ast);
-    it.node.name = node.text;
+    const parent = getAstParent(ast);
+    parent.name = node.text;
 
-    parseExtraType(it.node, extra);
+    parseExtraType(parent, extra);
 }
 
 /**
@@ -333,10 +326,10 @@ function parseType(ast, stack, node, extra) {
  * - `int32_t&`
  */
 function parsePrimitiveType(ast, stack, node, extra) {
-    const it = getAstCurrent(ast);
-    it.node.name = node.text;
+    const parent = getAstParent(ast);
+    parent.name = node.text;
 
-    parseExtraType(it.node, extra);
+    parseExtraType(parent, extra);
 }
 
 /**
@@ -350,7 +343,8 @@ function parsePrimitiveType(ast, stack, node, extra) {
  * - `HashMap<uint64_t, WeakHandle<GameObject>>`
  */
 function parseTemplateType(ast, stack, node) {
-    const it = getAstCurrent(ast);
+    const parent = getAstParent(ast);
+
     const name = node.childForFieldName('name');
     const args = node.childForFieldName('arguments');
 
@@ -362,13 +356,13 @@ function parseTemplateType(ast, stack, node) {
         const template = {};
         templates.push(template);
 
-        ast.push({node: template});
+        ast.push(template);
         stack.push({pop: true});
         stack.push({node: type, extra: decl ? [decl] : null});
     }
 
-    it.node.name = name.text;
-    it.node.templates = templates;
+    parent.name = name.text;
+    parent.templates = templates;
 }
 
 /**
