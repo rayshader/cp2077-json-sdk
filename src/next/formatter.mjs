@@ -49,7 +49,11 @@ export function formatCPP(node, indent) {
 
             if (node.type.ptr) type += '*';
             if (node.type.ref) type += '&';
-            code += `${pad}${type} ${node.name};\n`;
+            code += `${pad}${type} ${node.name};`;
+            if (node.offset !== undefined) {
+                code += ` // ${node.offset.toString(16).toUpperCase()}`;
+            }
+            code += '\n';
             break;
         }
     }
