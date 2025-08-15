@@ -71,7 +71,8 @@ const files = [
     //join('tests', 'struct_empty.hpp'),
     //join('tests', 'struct_forward.hpp'),
     //join('tests', 'struct_namespace.hpp'),
-    join('tests', 'struct_namespace_nested.hpp'),
+    //join('tests', 'struct_namespace_nested.hpp'),
+    join('tests', 'struct_template.hpp'),
 
     //join(srcPath, 'Scripting', 'Natives', 'Vector4.hpp'),
     //join(srcPath, 'CName.hpp'),                                     // TODO: ignore "* ToString() const" method

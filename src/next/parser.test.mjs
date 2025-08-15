@@ -120,4 +120,53 @@ describe('struct', () => {
             },
         ]);
     });
+
+    it('should parse structs with templates', () => {
+        const ast = parseHeader(read('tests/struct_template.hpp'));
+
+        expect(ast).toEqual([
+            // Vector<T>
+            {
+                'type': 'struct',
+                'name': 'Vector',
+                'templates': [
+                    {'name': 'T'},
+                ],
+                'fields': [
+                    {'offset': 0x0, 'type': {'name': 'T', 'ptr': true}, 'name': 'items'},
+                    {'offset': 0x8, 'type': {'name': 'uint32_t'}, 'name': 'size'},
+                    {'offset': 0xC, 'type': {'name': 'uint32_t'}, 'name': 'capacity'}
+                ]
+            },
+
+            // Pair<K, V>
+            {
+                'type': 'struct',
+                'name': 'Pair',
+                'templates': [
+                    {'name': 'K'},
+                    {'name': 'V'},
+                ],
+                'fields': [
+                    {'type': {'name': 'K'}, 'name': 'key'},
+                    {'type': {'name': 'V'}, 'name': 'value'},
+                ]
+            },
+
+            // Map<K, V>
+            {
+                'type': 'struct',
+                'name': 'Map',
+                'templates': [
+                    {'name': 'K'},
+                    {'name': 'V'},
+                ],
+                'fields': [
+                    {'type': {'name': 'Pair', 'templates': [{'name': 'K'}, {'name': 'V'}]}, 'name': 'pairs'},
+                    {'type': {'name': 'uint32_t'}, 'name': 'size'},
+                    {'type': {'name': 'uint32_t'}, 'name': 'capacity'}
+                ]
+            }
+        ]);
+    });
 });

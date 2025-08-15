@@ -73,7 +73,7 @@ export function parseHeader(code) {
  * @returns {boolean}
  */
 function canParse(type) {
-    return type === 'namespace_definition' || type === 'struct_specifier';
+    return type === 'namespace_definition' || type === 'struct_specifier' || type === 'template_declaration';
 }
 
 /**
@@ -114,6 +114,7 @@ const parsers = [
     {type: 'translation_unit', callback: parseTranslationUnit},
     {type: 'namespace_definition', callback: parseNamespace},
     {type: 'declaration_list', callback: parseTranslationUnit}, // See parseDeclarationList()
+    {type: 'template_declaration', callback: parseTemplateDeclaration},
     {type: 'struct_specifier', callback: parseStruct},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
@@ -196,7 +197,7 @@ function parseDeclarationList(stack, {parent, node}) {
  * @param stack {Stack}
  * @param it {StackIterator}
  */
-function parseStruct(stack, {parent, node}) {
+function parseStruct(stack, {parent, node, extra}) {
     const fields = findChildByType(node, 'field_declaration_list');
     if (!fields) {
         // Ignore forward struct declaration.
@@ -211,11 +212,38 @@ function parseStruct(stack, {parent, node}) {
     const struct = {
         'type': 'struct',
         'name': name.text,
-        'fields': []
     };
+    if (extra) {
+        struct.templates = extra;
+    }
+    struct.fields = [];
 
     parent.splice(0, 0, struct);
     stack.push({parent: struct.fields, node: fields});
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseTemplateDeclaration(stack, {parent, node}) {
+    const list = findChildByType(node, 'template_parameter_list');
+    const next = list.nextSibling;
+    const templates = [];
+
+    for (const param of list.children) {
+        const type = findChildByType(param, 'type_identifier');
+        if (!type) {
+            continue;
+        }
+
+        const template = {};
+        templates.push(template);
+
+        stack.push({parent: template, node: type});
+    }
+
+    stack.push({parent: parent, node: next, extra: templates});
 }
 
 /**
