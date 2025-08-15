@@ -162,7 +162,7 @@ describe('struct', () => {
                     {'name': 'V'},
                 ],
                 'fields': [
-                    {'type': {'name': 'Pair', 'templates': [{'name': 'K'}, {'name': 'V'}]}, 'name': 'pairs'},
+                    {'type': {'name': 'Pair', 'templates': [{'name': 'K'}, {'name': 'V'}], 'ptr': true}, 'name': 'pairs'},
                     {'type': {'name': 'uint32_t'}, 'name': 'size'},
                     {'type': {'name': 'uint32_t'}, 'name': 'capacity'}
                 ]

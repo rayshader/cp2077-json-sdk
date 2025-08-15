@@ -53,9 +53,8 @@ export function parseHeader(code) {
     /** @type {Stack} */
     const stack = [];
 
-    // NOTE: root node of this AST document.
+    // Parse this header and create its AST document.
     stack.push({parent: root, node: tree.rootNode});
-
     while (stack.length > 0) {
         parseNode(stack);
     }
@@ -354,7 +353,7 @@ function parsePrimitiveType(stack, {parent, node, extra}) {
  * @param stack {Stack}
  * @param it {StackIterator}
  */
-function parseTemplateType(stack, {parent, node}) {
+function parseTemplateType(stack, {parent, node, extra}) {
     const args = node.childForFieldName('arguments');
     const descriptors = findChildrenByType(args, 'type_descriptor');
     const templates = [];
@@ -371,6 +370,8 @@ function parseTemplateType(stack, {parent, node}) {
     const name = node.childForFieldName('name');
     parent.name = name.text;
     parent.templates = templates;
+
+    parseDeclarators(parent, extra);
 }
 
 /**
