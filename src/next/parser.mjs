@@ -137,6 +137,7 @@ const parsers = [
     {type: 'declaration_list', callback: parseTranslationUnit}, // See parseDeclarationList()
     {type: 'template_declaration', callback: parseTemplateDeclaration},
     {type: 'struct_specifier', callback: parseStruct},
+    {type: 'base_class_clause', callback: parseBaseClassClause},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
     {type: 'type_identifier', callback: parseType},
@@ -219,6 +220,8 @@ function parseDeclarationList(stack, {parent, node}) {
  * @param it {StackIterator}
  */
 function parseStruct(stack, {parent, node, extra}) {
+    const inherit = findChildByType(node, 'base_class_clause');
+
     const fields = findChildByType(node, 'field_declaration_list');
     if (!fields) {
         // Ignore forward struct declaration.
@@ -237,10 +240,24 @@ function parseStruct(stack, {parent, node, extra}) {
     if (extra) {
         struct.templates = extra;
     }
+    if (inherit) {
+        struct.inherit = {};
+        stack.push({parent: struct.inherit, node: inherit});
+    }
     struct.fields = [];
 
     parent.splice(0, 0, struct);
     stack.push({parent: struct.fields, node: fields});
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseBaseClassClause(stack, {parent, node}) {
+    // NOTE: only one base class is supported.
+    const clause = node.child(1);
+    stack.push({parent: parent, node: clause});
 }
 
 /**

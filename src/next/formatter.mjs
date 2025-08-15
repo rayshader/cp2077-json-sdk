@@ -15,7 +15,17 @@ export function formatCPP(node, indent) {
             if (node.templates) {
                 code += `${pad}template<${node.templates.map((template) => template.name).join(', ')}>\n`;
             }
-            code += `${pad}struct ${node.name} {\n`;
+            code += `${pad}struct ${node.name} `;
+            if (node.inherit) {
+                code += `: ${node.inherit.name}`;
+                if (node.inherit.templates) {
+                    code += '<';
+                    code += node.inherit.templates.map((template) => template.name).join(', ');
+                    code += '>';
+                }
+                code += ' ';
+            }
+            code += `{\n`;
             for (const field of node.fields) {
                 code += formatCPP(field, indent + 2);
             }

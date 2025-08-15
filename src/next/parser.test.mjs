@@ -69,6 +69,43 @@ describe('struct', () => {
         });
     });
 
+    it('should parse struct with inheritance', () => {
+        const ast = parseHeader(read('tests/struct_inherit.hpp'));
+
+        expect(ast).toEqual([
+            {
+                type: 'struct',
+                name: 'Entity',
+                fields: [],
+            },
+            {
+                type: 'struct',
+                name: 'GameObject',
+                inherit: {name: 'Entity'},
+                fields: [],
+            },
+            {
+                type: 'struct',
+                name: 'ASystem',
+                templates: [
+                    {name: 'T'}
+                ],
+                fields: [],
+            },
+            {
+                type: 'struct',
+                name: 'AudioSystem',
+                inherit: {
+                    name: 'ASystem',
+                    templates: [
+                        {name: 'GameObject'}
+                    ]
+                },
+                fields: [],
+            },
+        ]);
+    });
+
     it('should parse structs within a namespace', () => {
         const ast = parseHeader(read('tests/struct_namespace.hpp'));
 

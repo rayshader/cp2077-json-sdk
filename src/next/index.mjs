@@ -68,9 +68,10 @@ info(`Listing all source files in ${nicePath(srcPath)}...`, false);
 //*
 const files = [
     //join('tests', 'struct.hpp'),
-    join('tests', 'struct_functions.hpp'),
     //join('tests', 'struct_empty.hpp'),
     //join('tests', 'struct_forward.hpp'),
+    //join('tests', 'struct_functions.hpp'),
+    join('tests', 'struct_inherit.hpp'),
     //join('tests', 'struct_namespace.hpp'),
     //join('tests', 'struct_namespace_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
