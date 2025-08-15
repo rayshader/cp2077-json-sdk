@@ -14,14 +14,14 @@ describe('struct', () => {
 
         expect(ast).toEqual([
             {
-                'type': 'struct',
-                'name': 'GameApp',
-                'fields': [],
+                type: 'struct',
+                name: 'GameApp',
+                fields: [],
             },
             {
-                'type': 'struct',
-                'name': 'GameNetwork',
-                'fields': [],
+                type: 'struct',
+                name: 'GameNetwork',
+                fields: [],
             }
         ]);
     });
@@ -32,25 +32,25 @@ describe('struct', () => {
 
         const struct = ast[0];
         expect(struct).toEqual({
-            'type': 'struct',
-            'name': 'GameApp',
-            'fields': [
-                {'name': 'kMode', 'type': {'static': true, 'constexpr': true, 'const': true, 'name': 'bool'}},
+            type: 'struct',
+            name: 'GameApp',
+            fields: [
+                {name: 'kMode', type: {'static': true, 'constexpr': true, 'const': true, name: 'bool'}},
 
-                {'offset': 0x0, 'name': 'isRunning', 'type': {'name': 'bool'}},
-                {'offset': 0x4, 'name': 'delta', 'type': {'name': 'float'}},
-                {'offset': 0x8, 'name': 'context', 'type': {'name': 'void', 'ptr': true}},
+                {offset: 0x0, name: 'isRunning', type: {name: 'bool'}},
+                {offset: 0x4, name: 'delta', type: {name: 'float'}},
+                {offset: 0x8, name: 'context', type: {name: 'void', 'ptr': true}},
 
-                {'offset': 0x10, 'name': 'buffer', 'type': {'name': 'DynArray', 'templates': [{'name': 'int32_t'}]}},
-                {'offset': 0x20, 'name': 'lines', 'type': {'name': 'DynArray', 'templates': [{'name': 'char', 'ptr': true}]}},
+                {offset: 0x10, name: 'buffer', type: {name: 'DynArray', templates: [{name: 'int32_t'}]}},
+                {offset: 0x20, name: 'lines', type: {name: 'DynArray', templates: [{name: 'char', 'ptr': true}]}},
 
-                {'name': 'pool', 'type': {'name': 'HashMap', 'templates': [{'name': 'uint64_t'}, {'name': 'CString'}]}},
+                {name: 'pool', type: {name: 'HashMap', templates: [{name: 'uint64_t'}, {name: 'CString'}]}},
 
                 {
-                    'name': 'components',
-                    'type': {
-                        'name': 'DynArray',
-                        'templates': [{'name': 'Handle', 'templates': [{'name': 'void', 'ptr': true}]}]
+                    name: 'components',
+                    type: {
+                        name: 'DynArray',
+                        templates: [{name: 'Handle', templates: [{name: 'void', 'ptr': true}]}]
                     }
                 },
             ],
@@ -63,9 +63,9 @@ describe('struct', () => {
 
         const struct = ast[0];
         expect(struct).toEqual({
-            'type': 'struct',
-            'name': 'GameApp',
-            'fields': [],
+            type: 'struct',
+            name: 'GameApp',
+            fields: [],
         });
     });
 
@@ -74,35 +74,35 @@ describe('struct', () => {
 
         expect(ast).toEqual([
             {
-                'type': 'namespace',
-                'name': 'Awesome',
-                'children': [
+                type: 'namespace',
+                name: 'Awesome',
+                children: [
                     {
-                        'type': 'struct',
-                        'name': 'GameApp',
-                        'fields': [],
+                        type: 'struct',
+                        name: 'GameApp',
+                        fields: [],
                     },
                     {
-                        'type': 'struct',
-                        'name': 'GameNetwork',
-                        'fields': [],
+                        type: 'struct',
+                        name: 'GameNetwork',
+                        fields: [],
                     },
                 ]
             },
 
             {
-                'type': 'namespace',
-                'name': 'Epsiloon',
-                'children': [
+                type: 'namespace',
+                name: 'Epsiloon',
+                children: [
                     {
-                        'type': 'struct',
-                        'name': 'RendererSystem',
-                        'fields': [],
+                        type: 'struct',
+                        name: 'RendererSystem',
+                        fields: [],
                     },
                     {
-                        'type': 'struct',
-                        'name': 'AudioSystem',
-                        'fields': [],
+                        type: 'struct',
+                        name: 'AudioSystem',
+                        fields: [],
                     },
                 ]
             }
@@ -114,17 +114,17 @@ describe('struct', () => {
 
         expect(ast).toEqual([
             {
-                'type': 'namespace',
-                'name': 'Awesome',
-                'children': [
+                type: 'namespace',
+                name: 'Awesome',
+                children: [
                     {
-                        'type': 'namespace',
-                        'name': 'Event',
-                        'children': [
+                        type: 'namespace',
+                        name: 'Event',
+                        children: [
                             {
-                                'type': 'struct',
-                                'name': 'EventListener',
-                                'fields': [],
+                                type: 'struct',
+                                name: 'EventListener',
+                                fields: [],
                             }
                         ],
                     },
@@ -139,44 +139,44 @@ describe('struct', () => {
         expect(ast).toEqual([
             // Vector<T>
             {
-                'type': 'struct',
-                'name': 'Vector',
-                'templates': [
-                    {'name': 'T'},
+                type: 'struct',
+                name: 'Vector',
+                templates: [
+                    {name: 'T'},
                 ],
-                'fields': [
-                    {'offset': 0x0, 'type': {'name': 'T', 'ptr': true}, 'name': 'items'},
-                    {'offset': 0x8, 'type': {'name': 'uint32_t'}, 'name': 'size'},
-                    {'offset': 0xC, 'type': {'name': 'uint32_t'}, 'name': 'capacity'}
+                fields: [
+                    {offset: 0x0, type: {name: 'T', 'ptr': true}, name: 'items'},
+                    {offset: 0x8, type: {name: 'uint32_t'}, name: 'size'},
+                    {offset: 0xC, type: {name: 'uint32_t'}, name: 'capacity'}
                 ]
             },
 
             // Pair<K, V>
             {
-                'type': 'struct',
-                'name': 'Pair',
-                'templates': [
-                    {'name': 'K'},
-                    {'name': 'V'},
+                type: 'struct',
+                name: 'Pair',
+                templates: [
+                    {name: 'K'},
+                    {name: 'V'},
                 ],
-                'fields': [
-                    {'type': {'name': 'K'}, 'name': 'key'},
-                    {'type': {'name': 'V'}, 'name': 'value'},
+                fields: [
+                    {type: {name: 'K'}, name: 'key'},
+                    {type: {name: 'V'}, name: 'value'},
                 ]
             },
 
             // Map<K, V>
             {
-                'type': 'struct',
-                'name': 'Map',
-                'templates': [
-                    {'name': 'K'},
-                    {'name': 'V'},
+                type: 'struct',
+                name: 'Map',
+                templates: [
+                    {name: 'K'},
+                    {name: 'V'},
                 ],
-                'fields': [
-                    {'type': {'name': 'Pair', 'templates': [{'name': 'K'}, {'name': 'V'}], 'ptr': true}, 'name': 'pairs'},
-                    {'type': {'name': 'uint32_t'}, 'name': 'size'},
-                    {'type': {'name': 'uint32_t'}, 'name': 'capacity'}
+                fields: [
+                    {type: {name: 'Pair', templates: [{name: 'K'}, {name: 'V'}], 'ptr': true}, name: 'pairs'},
+                    {type: {name: 'uint32_t'}, name: 'size'},
+                    {type: {name: 'uint32_t'}, name: 'capacity'}
                 ]
             }
         ]);
