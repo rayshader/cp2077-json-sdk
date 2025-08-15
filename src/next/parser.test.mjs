@@ -37,12 +37,12 @@ describe('struct', () => {
             'fields': [
                 {'name': 'kMode', 'type': {'static': true, 'constexpr': true, 'const': true, 'name': 'bool'}},
 
-                {'offset': 0, 'name': 'isRunning', 'type': {'name': 'bool'}},
-                {'offset': 4, 'name': 'delta', 'type': {'name': 'float'}},
-                {'offset': 8, 'name': 'context', 'type': {'name': 'void', 'ptr': true}},
+                {'offset': 0x0, 'name': 'isRunning', 'type': {'name': 'bool'}},
+                {'offset': 0x4, 'name': 'delta', 'type': {'name': 'float'}},
+                {'offset': 0x8, 'name': 'context', 'type': {'name': 'void', 'ptr': true}},
 
-                {'name': 'buffer', 'type': {'name': 'DynArray', 'templates': [{'name': 'int32_t'}]}},
-                {'name': 'lines', 'type': {'name': 'DynArray', 'templates': [{'name': 'char', 'ptr': true}]}},
+                {'offset': 0x10, 'name': 'buffer', 'type': {'name': 'DynArray', 'templates': [{'name': 'int32_t'}]}},
+                {'offset': 0x20, 'name': 'lines', 'type': {'name': 'DynArray', 'templates': [{'name': 'char', 'ptr': true}]}},
 
                 {'name': 'pool', 'type': {'name': 'HashMap', 'templates': [{'name': 'uint64_t'}, {'name': 'CString'}]}},
 

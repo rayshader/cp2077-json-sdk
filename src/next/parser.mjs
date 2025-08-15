@@ -266,7 +266,7 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
     const field = {};
     // NOTE: extract offset information from comment when present
     if (extra && extra.type === 'comment') {
-        const match = extra.text.match(/\/\/ (?<offset>\d+)/);
+        const match = extra.text.match(/\/\/\s*(?<offset>[0-9a-fA-F]+)/);
         if (match && match.groups.offset) {
             field.offset = parseInt(match.groups.offset, 16);
         }
