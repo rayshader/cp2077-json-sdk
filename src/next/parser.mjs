@@ -2,6 +2,7 @@ import Parser from "tree-sitter";
 import GrammarCPP from "tree-sitter-cpp";
 import fs from "fs";
 import {debug, error, nicePath} from "../logger.mjs";
+import {formatCPP} from "./formatter.mjs";
 
 const treeParser = new Parser();
 treeParser.setLanguage(GrammarCPP);
@@ -59,9 +60,18 @@ export function parseHeader(code) {
         parseNode(stack);
     }
 
-    //*
+    /*
     debug('AST JSON:');
     debug(JSON.stringify(root, null, 1));
+    //*/
+
+    //*
+    debug('```cpp');
+    for (const node of root) {
+        const code = formatCPP(node, 0);
+        code.split('\n').forEach((line) => debug(line, true));
+    }
+    debug('```');
     //*/
 
     return root;
