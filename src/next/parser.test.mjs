@@ -57,6 +57,18 @@ describe('struct', () => {
         });
     });
 
+    it('should parse struct and ignore functions/operators/ctor/dtor', () => {
+        const ast = parseHeader(read('tests/struct_functions.hpp'));
+        expect(ast).toHaveLength(1);
+
+        const struct = ast[0];
+        expect(struct).toEqual({
+            'type': 'struct',
+            'name': 'GameApp',
+            'fields': [],
+        });
+    });
+
     it('should parse structs within a namespace', () => {
         const ast = parseHeader(read('tests/struct_namespace.hpp'));
 

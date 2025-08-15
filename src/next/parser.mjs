@@ -111,6 +111,18 @@ function findDeclarators(node) {
     return node.children.filter((child) => child.type.endsWith('_declarator'));
 }
 
+function isFunction(decl) {
+    do {
+        const current = decl;
+        if (current.type === 'function_declarator') {
+            return true;
+        }
+        decl = current.childForFieldName('declarator');
+        decl ??= findChildByType(current, 'function_declarator');
+    } while (decl);
+    return false;
+}
+
 /**
  * @typedef ParserInfo
  * @type {object}
@@ -293,6 +305,9 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
 
     const decl = node.childForFieldName('declarator');
     if (!decl) {
+        return;
+    }
+    if (isFunction(decl)) {
         return;
     }
 
