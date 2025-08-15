@@ -31,16 +31,15 @@ export function parse(files, verbose) {
 }
 
 /**
- * @typedef AstNodeIterator
- * @type {object}
+ * @typedef {StackIterator[]} Stack
  */
 
 /**
- * @typedef TSNodeIterator
- * @type {object}
+ * @typedef StackIterator
+ * @param code
+ * @property {object=} parent
  * @property {object=} node
- * @property {object=} extra - optional data to associate with the node.
- * @property {boolean=} pop - whether to pop the node from the AST stack?
+ * @property {object=} extra
  */
 
 export function parseHeader(code) {
@@ -48,27 +47,23 @@ export function parseHeader(code) {
 
     debug('');
 
-    /** @type {AstNodeIterator[]} */
-    const ast = [];
-    /** @type {TSNodeIterator[]} */
+    /** @type {any[]} */
+    const root = [];
+
+    /** @type {Stack} */
     const stack = [];
 
     // NOTE: root node of this AST document.
-    ast.push([]);
-    stack.push({node: tree.rootNode});
+    stack.push({parent: root, node: tree.rootNode});
+
     while (stack.length > 0) {
-        parseNode(ast, stack);
+        parseNode(stack);
     }
 
     //*
     debug('AST JSON:');
-    debug(JSON.stringify(ast[0], null, 1));
+    debug(JSON.stringify(root, null, 1));
     //*/
-
-    const root = ast[0];
-    if (!root) {
-        return null;
-    }
 
     return root;
 }
@@ -79,14 +74,6 @@ export function parseHeader(code) {
  */
 function canParse(type) {
     return type === 'namespace_definition' || type === 'struct_specifier';
-}
-
-/**
- * @param ast {AstNodeIterator[]}
- * @returns {object[]}
- */
-function getAstParent(ast) {
-    return ast.length === 0 ? null : ast[ast.length - 1];
 }
 
 /**
@@ -126,7 +113,7 @@ function findDeclarators(node) {
 const parsers = [
     {type: 'translation_unit', callback: parseTranslationUnit},
     {type: 'namespace_definition', callback: parseNamespace},
-    {type: 'declaration_list', callback: parseDeclarationList},
+    {type: 'declaration_list', callback: parseTranslationUnit}, // See parseDeclarationList()
     {type: 'struct_specifier', callback: parseStruct},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
@@ -136,51 +123,39 @@ const parsers = [
 ];
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
+ * @param stack {Stack}
  */
-function parseNode(ast, stack) {
+function parseNode(stack) {
     const it = stack.pop();
-    if (it.pop) {
-        // Always keep the first node in the stack.
-        if (ast.length > 1) {
-            ast.pop();
-        }
-        return;
-    }
-
     const node = it.node;
-
     const parser = parsers.find((item) => item.type === node.type);
     if (!parser) {
         error(`Missing implementation for node type: ${node.type}`);
         return;
     }
 
-    parser.callback(ast, stack, node, it.extra);
+    parser.callback(stack, it);
 }
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
- * @param node {object}
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseTranslationUnit(ast, stack, node) {
+function parseTranslationUnit(stack, {parent, node}) {
     for (const child of node.children) {
         if (!canParse(child.type)) {
             continue;
         }
 
-        stack.push({node: child});
+        stack.push({parent: parent, node: child});
     }
 }
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
- * @param node {object}
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseNamespace(ast, stack, node) {
+function parseNamespace(stack, {parent, node}) {
     const name = findChildByType(node, 'namespace_identifier');
     if (!name) {
         return;
@@ -197,33 +172,31 @@ function parseNamespace(ast, stack, node) {
         'children': []
     };
 
-    const parent = getAstParent(ast);
     parent.splice(0, 0, namespace);
-
-    ast.push(namespace.children);
-
-    stack.push({pop: true});
-    stack.push({node: body});
+    stack.push({parent: namespace.children, node: body});
 }
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
- * @param node {object}
+ * NOTE: exactly the same as {@link parseTranslationUnit} for now. Function is
+ *       kept in case this token diverges in the future.
+ *
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseDeclarationList(ast, stack, node) {
-    const structs = findChildrenByType(node, 'struct_specifier');
-    for (const struct of structs) {
-        stack.push({node: struct});
+function parseDeclarationList(stack, {parent, node}) {
+    for (const child of node.children) {
+        if (!canParse(child.type)) {
+            continue;
+        }
+        stack.push({parent: parent, node: child});
     }
 }
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
- * @param node {object}
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseStruct(ast, stack, node) {
+function parseStruct(stack, {parent, node}) {
     const fields = findChildByType(node, 'field_declaration_list');
     if (!fields) {
         // Ignore forward struct declaration.
@@ -241,28 +214,23 @@ function parseStruct(ast, stack, node) {
         'fields': []
     };
 
-    const parent = getAstParent(ast);
     parent.splice(0, 0, struct);
-
-    ast.push(struct.fields);
-    stack.push({pop: true});
-    stack.push({node: fields});
+    stack.push({parent: struct.fields, node: fields});
 }
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
- * @param node {object}
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseFieldDeclarationList(ast, stack, node) {
+function parseFieldDeclarationList(stack, {parent, node}) {
     const size = node.children.length;
     for (let i = 0; i < size; i++) {
         const child = node.children[i];
         const next = i + 1 < size ? node.children[i + 1] : null;
 
         if (child.type === 'field_declaration') {
-            /** @type {TSNodeIterator} */
-            const field = {node: child};
+            /** @type {StackIterator} */
+            const field = {parent: parent, node: child};
 
             // Associate comment with this field to extract offset information
             if (next?.type === 'comment') {
@@ -277,12 +245,10 @@ function parseFieldDeclarationList(ast, stack, node) {
 }
 
 /**
- * @param ast {AstNodeIterator[]}
- * @param stack {TSNodeIterator[]}
- * @param node {object}
- * @param extra {object}
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseFieldDeclaration(ast, stack, node, extra) {
+function parseFieldDeclaration(stack, {parent, node, extra}) {
     const type = node.childForFieldName('type');
     if (!type) {
         return;
@@ -317,16 +283,15 @@ function parseFieldDeclaration(ast, stack, node, extra) {
 
     field.name = name ? name.text : decl.text;
 
-    const parent = getAstParent(ast);
     parent.splice(0, 0, field);
-
-    ast.push(field.type);
-    stack.push({pop: true});
-    stack.push({node: type, extra: declarators});
+    stack.push({parent: field.type, node: type, extra: declarators});
 }
 
-function parseType(ast, stack, node, extra) {
-    const parent = getAstParent(ast);
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseType(stack, {parent, node, extra}) {
     parent.name = node.text;
 
     parseDeclarators(parent, extra);
@@ -338,9 +303,11 @@ function parseType(ast, stack, node, extra) {
  * - `float`
  * - `void*`
  * - `int32_t&`
+ *
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parsePrimitiveType(ast, stack, node, extra) {
-    const parent = getAstParent(ast);
+function parsePrimitiveType(stack, {parent, node, extra}) {
     parent.name = node.text;
 
     parseDeclarators(parent, extra);
@@ -355,22 +322,22 @@ function parsePrimitiveType(ast, stack, node, extra) {
  * - `HashMap<T, K>`
  * - `HashMap<uint64_t, CString>`
  * - `HashMap<uint64_t, WeakHandle<GameObject>>`
+ *
+ * @param stack {Stack}
+ * @param it {StackIterator}
  */
-function parseTemplateType(ast, stack, node) {
-    const parent = getAstParent(ast);
-
+function parseTemplateType(stack, {parent, node}) {
     const args = node.childForFieldName('arguments');
     const descriptors = findChildrenByType(args, 'type_descriptor');
     const templates = [];
+
     for (const descriptor of descriptors) {
         const type = descriptor.childForFieldName('type');
         const decl = descriptor.childForFieldName('declarator');
         const template = {};
         templates.push(template);
 
-        ast.push(template);
-        stack.push({pop: true});
-        stack.push({node: type, extra: decl ? [decl] : null});
+        stack.push({parent: template, node: type, extra: decl ? [decl] : null});
     }
 
     const name = node.childForFieldName('name');

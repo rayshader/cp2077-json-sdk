@@ -96,4 +96,28 @@ describe('struct', () => {
             }
         ]);
     });
+
+    it('should parse structs with nested namespaces', () => {
+        const ast = parseHeader(read('tests/struct_namespace_nested.hpp'));
+
+        expect(ast).toEqual([
+            {
+                'type': 'namespace',
+                'name': 'Awesome',
+                'children': [
+                    {
+                        'type': 'namespace',
+                        'name': 'Event',
+                        'children': [
+                            {
+                                'type': 'struct',
+                                'name': 'EventListener',
+                                'fields': [],
+                            }
+                        ],
+                    },
+                ]
+            },
+        ]);
+    });
 });

@@ -1,6 +1,8 @@
 #pragma once
 
 struct GameApp {
+  static constexpr const bool kMode = true;
+
   bool isRunning;           // 0
   float delta;              // 4
   void* context;            // 8
