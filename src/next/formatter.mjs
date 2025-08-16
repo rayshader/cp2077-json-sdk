@@ -61,6 +61,10 @@ export function formatCPP(node, indent) {
             if (node.const)     code += 'const ';
             if (node.volatile)  code += 'volatile ';
 
+            if (node.namespaces) {
+                code += node.namespaces.join('::');
+                code += '::';
+            }
             code += node.name;
 
             if (node.templates) {

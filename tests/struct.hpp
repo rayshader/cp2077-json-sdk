@@ -17,4 +17,9 @@ struct GameApp {
   HashMap<uint64_t, CString> pool;
 
   DynArray<Handle<void*>> components;
+
+  game::vehicle::BaseObject vehicle;
+  game::Object* gameObject;
+  Handle<game::world::worldNode> world;
+  Handle<game::Object*> gameObjectRef;
 };

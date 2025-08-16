@@ -57,6 +57,27 @@ describe('struct', () => {
                         templates: [{name: 'Handle', templates: [{name: 'void', 'ptr': true}]}]
                     }
                 },
+
+                {name: 'vehicle', type: {namespaces: ['game', 'vehicle'], name: 'BaseObject'}},
+                {name: 'gameObject', type: {namespaces: ['game'], name: 'Object', ptr: true}},
+                {
+                    name: 'world',
+                    type: {
+                        name: 'Handle',
+                        templates: [
+                            {namespaces: ['game', 'world'], name: 'worldNode'}
+                        ]
+                    }
+                },
+                {
+                    name: 'gameObjectRef',
+                    type: {
+                        name: 'Handle',
+                        templates: [
+                            {namespaces: ['game'], name: 'Object', ptr: true}
+                        ]
+                    }
+                },
             ],
         });
     });

@@ -140,7 +140,8 @@ const parsers = [
     {type: 'base_class_clause', callback: parseBaseClassClause},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
-    {type: 'type_identifier', callback: parseType},
+    {type: 'qualified_identifier', callback: parseQualifiedIdentifier},
+    {type: 'type_identifier', callback: parseTypeIdentifier},
     {type: 'primitive_type', callback: parsePrimitiveType},
     {type: 'template_type', callback: parseTemplateType},
 ];
@@ -360,7 +361,30 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
  * @param stack {Stack}
  * @param it {StackIterator}
  */
-function parseType(stack, {parent, node, extra}) {
+function parseQualifiedIdentifier(stack, {parent, node, extra}) {
+    const namespaces  = [];
+    parent.namespaces = namespaces;
+
+    while (node) {
+        const scope = node.childForFieldName('scope');
+        const next = node.childForFieldName('name');
+
+        namespaces.push(scope.text);
+        if (next.type !== 'qualified_identifier') {
+            stack.push({parent: parent, node: next});
+            break;
+        }
+        node = next;
+    }
+
+    parseDeclarators(parent, extra);
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseTypeIdentifier(stack, {parent, node, extra}) {
     parent.name = node.text;
 
     parseDeclarators(parent, extra);
