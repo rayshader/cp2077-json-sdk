@@ -41,6 +41,7 @@ export function formatCPP(node, indent) {
             if (node.type.volatile)  type += 'volatile ';
 
             type += node.type.name;
+
             if (node.type.templates) {
                 type += '<';
                 type += node.type.templates.map((template) => template.name).join(', ');
@@ -49,10 +50,16 @@ export function formatCPP(node, indent) {
 
             if (node.type.ptr) type += '*';
             if (node.type.ref) type += '&';
-            code += `${pad}${type} ${node.name};`;
+
+            code += `${pad}${type} ${node.name}`;
+            if (node.type.fixedArray !== undefined) code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
+
+            code += ';';
+
             if (node.offset !== undefined) {
                 code += ` // ${node.offset.toString(16).toUpperCase()}`;
             }
+
             code += '\n';
             break;
         }

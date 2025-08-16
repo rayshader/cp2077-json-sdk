@@ -44,6 +44,9 @@ describe('struct', () => {
                 {offset: 0x10, name: 'buffer', type: {name: 'DynArray', templates: [{name: 'int32_t'}]}},
                 {offset: 0x20, name: 'lines', type: {name: 'DynArray', templates: [{name: 'char', 'ptr': true}]}},
 
+                {offset: 0x30, name: 'unk30', type: {name: 'uint8_t', fixedArray: 0x1B}},
+                {offset: 0x4B, name: 'unk4B', type: {name: 'uint8_t', fixedArray: 0x10}},
+
                 {name: 'pool', type: {name: 'HashMap', templates: [{name: 'uint64_t'}, {name: 'CString'}]}},
 
                 {

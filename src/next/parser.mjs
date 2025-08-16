@@ -433,6 +433,10 @@ function parseDeclarators(node, declarators) {
             case 'reference_declarator':
                 node.ref = true;
                 break;
+            case 'array_declarator':
+                const size = declarator.childForFieldName('size');
+                node.fixedArray = parseExpression(size);
+                break;
         }
     }
 }
@@ -459,4 +463,43 @@ function parseQualifiers(node, qualifiers) {
                 break;
         }
     }
+}
+
+function parseExpression(expr) {
+    switch (expr.type) {
+        case 'number_literal':
+            return parseNumber(expr.text);
+        case 'binary_expression':
+            const left = expr.child(0);
+            const operator = expr.child(1).text;
+            const right = expr.child(2);
+
+            const a = parseExpression(left);
+            const b = parseExpression(right);
+
+            if (operator === '-') {
+                return a - b;
+            }
+            return 0;
+        default:
+            error(`Missing expression parser for: ${expr.type}`);
+            return 0;
+    }
+}
+
+function parseNumber(literal) {
+    const options = {
+        offset: 0,
+        radix: 10
+    };
+
+    if (literal.startsWith('0x')) {
+        options.offset = 2;
+        options.radix = 16;
+    }
+    if (literal.startsWith('0b')) {
+        options.offset = 2;
+        options.radix = 2;
+    }
+    return parseInt(literal.substring(options.offset), options.radix);
 }

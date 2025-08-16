@@ -10,6 +10,9 @@ struct GameApp {
   DynArray<int32_t> buffer; // 10
   DynArray<char*> lines;    // 20
 
+  uint8_t unk30[0x4B - 0x30]; // 30
+  uint8_t unk4B[0x10]; // 4B
+
   HashMap<uint64_t, CString> pool;
 
   DynArray<Handle<void*>> components;
