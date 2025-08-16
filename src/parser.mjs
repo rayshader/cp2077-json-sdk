@@ -159,6 +159,7 @@ const parsers = [
     {type: 'qualified_identifier', callback: parseQualifiedIdentifier},
     {type: 'type_identifier', callback: parseTypeIdentifier},
     {type: 'type_descriptor', callback: parseTypeDescriptor},
+    {type: 'placeholder_type_specifier', callback: parsePlaceholderTypeSpecifier},
     {type: 'primitive_type', callback: parsePrimitiveType},
     {type: 'template_type', callback: parseTemplateType},
     {type: 'number_literal', callback: parseNumberLiteral},
@@ -565,6 +566,14 @@ function parseTypeDescriptor(stack, {parent, node}) {
     parent.splice(0, 0, template);
 
     stack.push({parent: template, node: type, extra: decl ? [decl] : null});
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parsePlaceholderTypeSpecifier(stack, {parent, node}) {
+    parent.name = node.text; // should be 'auto' only
 }
 
 /**
