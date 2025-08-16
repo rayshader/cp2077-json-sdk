@@ -71,6 +71,7 @@ const files = [
     //join('tests', 'enum.hpp'),
     //join('tests', 'struct.hpp'),
     //join('tests', 'struct_alignment.hpp'),
+    //join('tests', 'struct_bitfield.hpp'),
     //join('tests', 'struct_empty.hpp'),
     //join('tests', 'struct_forward.hpp'),
     //join('tests', 'struct_functions.hpp'),
@@ -80,12 +81,10 @@ const files = [
     //join('tests', 'struct_template.hpp'),
 
     // TODO: support templated functions?
-    //       support constant for fixedArray
+    //       support evaluation of constant for fixedArray
     //join(srcPath, 'Memory', 'Pool.hpp'),
     // TODO: support identifier for expression?
     //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
-    // TODO: support bitfield declarations
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'EMeshChunkFlags.hpp'),
 ];
 //*/
 /*

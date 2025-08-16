@@ -456,6 +456,7 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
     const declarators = findDeclarators(node);
     const name = findChildByType(decl, 'field_identifier');
     const qualifiers = findChildrenByType(node, 'type_qualifier');
+    const bitfield = findChildByType(node, 'bitfield_clause');
 
     const field = {};
     // NOTE: extract offset information from comment when present
@@ -476,6 +477,10 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
     parseQualifiers(field.type, qualifiers);
 
     field.name = name ? name.text : decl.text;
+
+    if (bitfield) {
+        field.type.bitfield = parseNumber(bitfield.child(1).text);
+    }
 
     parent.splice(0, 0, field);
     stack.push({parent: field.type, node: type, extra: declarators});

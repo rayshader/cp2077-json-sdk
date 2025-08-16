@@ -63,6 +63,10 @@ export function formatCPP(node, indent) {
             code += `${pad}${formatCPP({type: 'type', node: node.type}, 0)} `;
             code += node.name;
 
+            if (node.type.bitfield !== undefined) {
+                code += ` : ${node.type.bitfield}`;
+            }
+
             if (node.type.fixedArray !== undefined) {
                 code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
             }

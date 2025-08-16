@@ -137,6 +137,22 @@ describe('struct', () => {
         });
     });
 
+    it('should parse struct with bitfield clauses', () => {
+        const ast = withFormatter(parseCPP(read('tests/struct_bitfield.hpp')));
+
+        expect(ast).toEqual([
+            {
+                type: 'struct',
+                name: 'ColorFlags',
+                fields: [
+                    {name: 'r', type: {name: 'uint8_t', bitfield: 3}},
+                    {name: 'g', type: {name: 'uint8_t', bitfield: 2}},
+                    {name: 'b', type: {name: 'uint8_t', bitfield: 3}},
+                ],
+            },
+        ]);
+    });
+
     it('should parse struct and ignore functions/operators/ctor/dtor', () => {
         const ast = withFormatter(parseCPP(read('tests/struct_functions.hpp')));
         expect(ast).toHaveLength(1);
