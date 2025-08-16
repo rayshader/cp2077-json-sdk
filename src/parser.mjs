@@ -195,8 +195,8 @@ function parseNode(stack, verbose) {
     if (!parser) {
         error(`Missing implementation for node type: ${node.type}`);
         if (verbose) {
-            debug(node);
-            debug(node.children);
+            error(node);
+            error(node.children);
         }
         return;
     }
