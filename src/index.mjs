@@ -68,6 +68,7 @@ info(`Listing all header files in ${nicePath(srcPath)}...`, false);
 //*
 const files = [
     //join('tests', 'struct.hpp'),
+    //join('tests', 'struct_alignment.hpp'),
     //join('tests', 'struct_empty.hpp'),
     //join('tests', 'struct_forward.hpp'),
     //join('tests', 'struct_functions.hpp'),

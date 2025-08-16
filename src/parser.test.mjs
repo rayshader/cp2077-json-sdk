@@ -142,6 +142,19 @@ describe('struct', () => {
         ]);
     });
 
+    it('should parse struct and ignore alignment', () => {
+        const ast = withFormatter(parseCPP(read('tests/struct_alignment.hpp')));
+
+        expect(ast).toEqual([
+            {
+                type: 'struct',
+                name: 'Backpack',
+                inherit: {name: 'Storage'},
+                fields: [],
+            },
+        ]);
+    });
+
     it('should parse structs within a namespace', () => {
         const ast = withFormatter(parseCPP(read('tests/struct_namespace.hpp')));
 
