@@ -14,7 +14,7 @@ export function parse(files, verbose) {
     for (const file of files) {
         try {
             const code = fs.readFileSync(file, {encoding: 'utf8'});
-            const ast = parseHeader(code);
+            const ast = parseHeader(code, verbose);
             if (ast) {
                 types.push({path: file, ast: ast});
             }
@@ -43,7 +43,13 @@ export function parse(files, verbose) {
  * @property {object=} extra
  */
 
-export function parseHeader(code) {
+/**
+ * Parse a C++ header file and return its AST document.
+ * @param code {string}
+ * @param verbose {boolean}
+ * @return {object[]}
+ */
+export function parseHeader(code, verbose) {
     const tree = treeParser.parse(code);
 
     debug('');
@@ -54,10 +60,9 @@ export function parseHeader(code) {
     /** @type {Stack} */
     const stack = [];
 
-    // Parse this header and create its AST document.
     stack.push({parent: root, node: tree.rootNode});
     while (stack.length > 0) {
-        parseNode(stack);
+        parseNode(stack, verbose);
     }
 
     /*
@@ -148,13 +153,18 @@ const parsers = [
 
 /**
  * @param stack {Stack}
+ * @param verbose {boolean}
  */
-function parseNode(stack) {
+function parseNode(stack, verbose) {
     const it = stack.pop();
     const node = it.node;
     const parser = parsers.find((item) => item.type === node.type);
     if (!parser) {
         error(`Missing implementation for node type: ${node.type}`);
+        if (verbose) {
+            debug(node);
+            debug(node.children);
+        }
         return;
     }
 
