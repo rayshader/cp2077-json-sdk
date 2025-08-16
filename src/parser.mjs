@@ -1,7 +1,7 @@
 import Parser from "tree-sitter";
 import GrammarCPP from "tree-sitter-cpp";
 import fs from "fs";
-import {debug, error, nicePath} from "../logger.mjs";
+import {debug, error, nicePath} from "./logger.mjs";
 import {formatCPP} from "./formatter.mjs";
 
 const treeParser = new Parser();

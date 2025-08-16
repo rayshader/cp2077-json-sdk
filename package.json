@@ -16,9 +16,8 @@
   "main": "src/index.mjs",
   "type": "module",
   "scripts": {
-    "start": "node src/index.mjs --sdk \"sdk\" --output \"types\"",
-    "next": "node src/next/index.mjs --verbose --sdk \"sdk\" --output \"types\"",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest src/next/"
+    "start": "node src/index.mjs --verbose --sdk \"sdk\" --output \"types\"",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
     "chalk": "^5.5.0",

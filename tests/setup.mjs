@@ -1,6 +1,6 @@
 import fs from "fs";
-import {formatCPP} from "../src/next/formatter.mjs";
-import {parseHeader} from "../src/next/parser.mjs";
+import {formatCPP} from "../src/formatter.mjs";
+import {parseHeader} from "../src/parser.mjs";
 
 /**
  * @param path {string}

@@ -1,6 +1,6 @@
 import {describe, expect, it} from "@jest/globals";
 import {parseHeader} from "./parser.mjs";
-import {read, withFormatter} from "../../tests/setup.mjs";
+import {read, withFormatter} from "../tests/setup.mjs";
 
 describe('struct', () => {
     it('should ignore forward structs declaration', () => {

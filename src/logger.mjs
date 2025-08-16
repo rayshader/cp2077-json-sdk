@@ -65,4 +65,16 @@ export const formatTime = (time) => {
     return `${_pad(hours, 2)}:${_pad(minutes, 2)}:${_pad(seconds, 2)}.${_pad(milliseconds, 3)}`;
 }
 
+export const formatAST = (node, indent = 0) => {
+    const padding = '  '.repeat(indent);
+    let text = `${padding}${node.type}${node.isNamed ? '' : ' (anonymous)'}\n`;
+
+    for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+
+        text += formatAST(child, indent + 1);
+    }
+    return text;
+}
+
 const _pad = (value, size = 2) => String(value).padStart(size, '0')

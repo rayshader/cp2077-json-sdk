@@ -5,11 +5,11 @@ import {z} from "zod";
 import {parser as cliParser} from "zod-opts";
 
 import {debug, print, error, info, nicePath, formatTime, warn} from "./logger.mjs";
-import {parse} from "./parse.mjs";
+import {parse} from "./parser.mjs";
 import {traverse} from "./traverse.mjs";
 
 const opts = cliParser()
-    .name('pnpm run start')
+    .name('pnpm start')
     .version('1.0.0')
     .options({
         sdk: {
@@ -20,6 +20,11 @@ const opts = cliParser()
             type: z.string().describe('Path to output JSON types.').default('types'),
             alias: 'dst'
         },
+        /*
+        merge: {
+            type: z.boolean().describe('Merge all types in a single file.').default(false),
+        },
+        */
         minify: {
             type: z.boolean().describe('Minify JSON output.').default(false),
             alias: 'c'
@@ -32,6 +37,7 @@ const opts = cliParser()
 
 const sdkPath = opts.sdk;
 const outputPath = opts.output;
+//const merge = opts.merge;
 const minify = opts.minify;
 const verbose = opts.verbose;
 
@@ -59,12 +65,26 @@ const printOK = () => {
 
 const startAt = Date.now();
 info(`Listing all source files in ${nicePath(srcPath)}...`, false);
-/*
+//*
 const files = [
+    join('tests', 'struct.hpp'),
+    //join('tests', 'struct_empty.hpp'),
+    //join('tests', 'struct_forward.hpp'),
+    //join('tests', 'struct_functions.hpp'),
+    //join('tests', 'struct_inherit.hpp'),
+    //join('tests', 'struct_namespace.hpp'),
+    //join('tests', 'struct_namespace_nested.hpp'),
+    //join('tests', 'struct_template.hpp'),
+
+    //join(srcPath, 'Scripting', 'Natives', 'Vector4.hpp'),
+    //join(srcPath, 'CName.hpp'),
+    //join(srcPath, 'DynArray.hpp'),
+
     //join(srcPath, 'Scripting', 'IScriptable.hpp'),
     //join(srcPath, 'Scripting', 'Stack.hpp'),
     //join(srcPath, 'ISerializable.hpp'),
     //join(srcPath, 'CName.hpp'),
+    //join(srcPath, 'DynArray.hpp'),
     //join(srcPath, 'GameEngine.hpp'),
     //join(srcPath, 'LaunchParameters.hpp'),
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'move', 'Policies.hpp'),
@@ -83,7 +103,7 @@ const files = [
     //join(srcPath, 'Scripting', 'Natives', 'gameIEntityStubSystem.hpp'),
 ];
 //*/
-//*
+/*
 const files = traverse(srcPath).filter(path => {
     if (path.includes(join('include', 'RED4ext', 'Api'))) {
         return false;
@@ -105,6 +125,8 @@ if (errors === 0) {
         warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
     }
 }
+
+/*
 
 const flattenObjects = (type) => {
     if (!type.objects) {
@@ -157,6 +179,7 @@ types.forEach(type => {
 if (ignore === 0) {
     printOK();
 }
+*/
 
 const elapsedTime = Date.now() - startAt;
 
