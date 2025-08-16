@@ -482,6 +482,14 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
         field.type.bitfield = parseNumber(bitfield.child(1).text);
     }
 
+    const defaultValue = node.childForFieldName('default_value');
+    if (defaultValue) {
+        field.default = parseNumber(defaultValue.text);
+        if (Number.isNaN(field.default)) {
+            field.default = defaultValue.text;
+        }
+    }
+
     parent.splice(0, 0, field);
     stack.push({parent: field.type, node: type, extra: declarators});
 }
@@ -708,6 +716,10 @@ function evalExpression(expr) {
 }
 
 function parseNumber(literal) {
+    if (literal.includes('.')) {
+        return parseFloat(literal);
+    }
+
     const options = {
         offset: 0,
         radix: 10

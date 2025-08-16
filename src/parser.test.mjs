@@ -79,7 +79,8 @@ describe('struct', () => {
             type: 'struct',
             name: 'GameApp',
             fields: [
-                {name: 'kMode', type: {'static': true, 'constexpr': true, 'const': true, name: 'bool'}},
+                {name: 'kMode', type: {'static': true, 'constexpr': true, 'const': true, name: 'bool'}, default: 'true'},
+                {name: 'kPi', type: {'static': true, 'constexpr': true, 'const': true, name: 'float'}, default: 3.141592},
 
                 {offset: 0x0, name: 'isRunning', type: {name: 'bool'}},
                 {offset: 0x4, name: 'delta', type: {name: 'float'}},

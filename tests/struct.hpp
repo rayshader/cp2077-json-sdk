@@ -2,6 +2,7 @@
 
 struct GameApp {
   static constexpr const bool kMode = true;
+  static constexpr const float kPi = 3.141592;
 
   bool isRunning;           // 00
   float delta;              // 04

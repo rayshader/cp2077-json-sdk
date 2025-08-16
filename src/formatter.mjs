@@ -71,6 +71,10 @@ export function formatCPP(node, indent) {
                 code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
             }
 
+            if (node.default !== undefined) {
+                code += ` = ${node.default}`;
+            }
+
             code += ';';
 
             if (node.offset !== undefined) {
