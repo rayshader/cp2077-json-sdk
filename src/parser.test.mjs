@@ -29,6 +29,19 @@ describe('enum', () => {
                     {name: 'Invalid', value: 4},
                 ]
             },
+            {
+                type: 'enum',
+                name: 'ETextureFormat',
+                base: 'uint16_t',
+                values: [
+                    {name: 'RGB', value: 0},
+                    {name: 'RGBA', value: 1},
+                    {name: 'DXT', value: 2},
+
+                    {name: 'RGB_Unsigned', value: 'RGB'},
+                    {name: 'DXT_Unsigned', value: 'DXT'},
+                ]
+            },
         ]);
     });
 });

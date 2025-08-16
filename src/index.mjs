@@ -79,11 +79,9 @@ const files = [
     //join('tests', 'struct_namespace_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
 
-    //join(srcPath, 'Memory', 'Pool.hpp'),  TODO: support templated functions? support constant for fixedArray
-    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),    TODO: support identifier for expression?
+    //join(srcPath, 'Memory', 'Pool.hpp'),  // TODO: support templated functions? support constant for fixedArray
+    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),    // TODO: support identifier for expression?
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'EMeshChunkFlags.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ECookingPlatform.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ETextureCompression.hpp'),
 ];
 //*/
 /*

@@ -14,3 +14,12 @@ enum EShape : int8_t {
   Count = 3,
   Invalid = 4
 };
+
+enum ETextureFormat : uint16_t {
+  RGB = 0,
+  RGBA = 1,
+  DXT = 2,
+
+  RGB_Unsigned = RGB,
+  DXT_Unsigned = DXT
+}

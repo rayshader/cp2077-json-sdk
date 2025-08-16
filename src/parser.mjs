@@ -490,11 +490,12 @@ function parseEnumeratorList(stack, {parent, node}) {
 
     for (const enumerator of enumerators) {
         const name = enumerator.childForFieldName('name');
-        const value = enumerator.childForFieldName('value');
+        const content = enumerator.childForFieldName('value');
+        const value = parseNumber(content.text);
 
         parent.push({
             name: name.text,
-            value: parseNumber(value.text)
+            value: Number.isNaN(value) ? content.text : value
         });
     }
 }
