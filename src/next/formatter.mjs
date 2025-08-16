@@ -13,7 +13,10 @@ export function formatCPP(node, indent) {
         }
         case 'struct': {
             if (node.templates) {
-                code += `${pad}template<${node.templates.map((template) => template.name).join(', ')}>\n`;
+                code += `${pad}template`;
+                code += `<`;
+                code += node.templates.map((template) => `typename ${template.name}`).join(', ');
+                code += `>\n`;
             }
             code += `${pad}struct ${node.name} `;
             if (node.inherit) {
