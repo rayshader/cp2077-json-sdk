@@ -27,4 +27,5 @@ struct GameApp {
 
   Array<float, 4> vector;
   uint32_t fixedConstant[kMax];
+  Array<void*, kMax> resources;
 };

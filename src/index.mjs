@@ -80,7 +80,7 @@ const files = [
     //join('tests', 'struct_namespace_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
 
-    // TODO: support identifier for expression?
+    // TODO: support external constant value
     //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
 ];
 //*/

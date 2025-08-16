@@ -771,13 +771,22 @@ function parseNumber(literal) {
 
 function postConstant(fields) {
     for (const field of fields) {
-        if (field.type.fixedArray === undefined) {
-            continue;
+        const type = field.type;
+
+        if (type.fixedArray !== undefined) {
+            const constant = fields.find((item) => item.name === type.fixedArray);
+            if (constant) {
+                type.fixedArray = constant.default;
+            }
         }
 
-        const constant = fields.find((item) => item.name === field.type.fixedArray);
-        if (constant) {
-            field.type.fixedArray = constant.default;
+        if (type.templates) {
+            for (const template of type.templates) {
+                const constant = fields.find((item) => item.name === template.name);
+                if (constant) {
+                    template.name = constant.default;
+                }
+            }
         }
     }
 }

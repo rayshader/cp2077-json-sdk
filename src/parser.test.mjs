@@ -79,8 +79,16 @@ describe('struct', () => {
             type: 'struct',
             name: 'GameApp',
             fields: [
-                {name: 'kMode', type: {'static': true, 'constexpr': true, 'const': true, name: 'bool'}, default: 'true'},
-                {name: 'kPi', type: {'static': true, 'constexpr': true, 'const': true, name: 'float'}, default: 3.141592},
+                {
+                    name: 'kMode',
+                    type: {'static': true, 'constexpr': true, 'const': true, name: 'bool'},
+                    default: 'true'
+                },
+                {
+                    name: 'kPi',
+                    type: {'static': true, 'constexpr': true, 'const': true, name: 'float'},
+                    default: 3.141592
+                },
                 {name: 'kMax', type: {'static': true, 'constexpr': true, 'const': true, name: 'int32_t'}, default: 128},
 
                 {offset: 0x0, name: 'isRunning', type: {name: 'bool'}},
@@ -140,6 +148,21 @@ describe('struct', () => {
                     type: {
                         name: 'uint32_t',
                         fixedArray: 128
+                    }
+                },
+                {
+                    name: 'resources',
+                    type: {
+                        name: 'Array',
+                        templates: [
+                            {
+                                name: 'void',
+                                ptr: true
+                            },
+                            {
+                                name: 128
+                            }
+                        ],
                     }
                 },
             ],
