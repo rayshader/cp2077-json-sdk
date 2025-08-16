@@ -2,6 +2,37 @@ import {describe, expect, it} from "@jest/globals";
 import {parseCPP} from "./parser.mjs";
 import {read, withFormatter} from "../tests/setup.mjs";
 
+describe('enum', () => {
+    it('should parse enum', () => {
+        let ast = withFormatter(parseCPP(read('tests/enum.hpp')));
+
+        expect(ast).toEqual([
+            {
+                type: 'enum',
+                name: 'EGameMode',
+                values: [
+                    {name: 'Singleplayer', value: 0},
+                    {name: 'Multiplayer', value: 1},
+                    {name: 'Count', value: 2},
+                    {name: 'Invalid', value: 3},
+                ]
+            },
+            {
+                type: 'enum',
+                name: 'EShape',
+                base: 'int8_t',
+                values: [
+                    {name: 'Rectangle', value: 0},
+                    {name: 'Circle', value: 1},
+                    {name: 'Triangle', value: 2},
+                    {name: 'Count', value: 3},
+                    {name: 'Invalid', value: 4},
+                ]
+            },
+        ]);
+    });
+});
+
 describe('struct', () => {
     it('should ignore forward structs declaration', () => {
         let ast = withFormatter(parseCPP(read('tests/struct_forward.hpp')));

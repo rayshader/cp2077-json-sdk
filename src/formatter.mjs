@@ -11,6 +11,20 @@ export function formatCPP(node, indent) {
             code += `${pad}}\n`;
             break;
         }
+        case 'enum': {
+            code += `${pad}enum class ${node.name} `;
+            if (node.base !== undefined) {
+                code += `: ${node.base} `;
+            }
+            code += `{\n`;
+
+            const padValue = padding(indent + 2);
+            code += node.values.map((value) => `${padValue}${value.name} = ${value.value}`).join(',\n');
+            code += '\n';
+
+            code += `${pad}};\n`;
+            break;
+        }
         case 'class':
         case 'struct': {
             if (node.templates) {

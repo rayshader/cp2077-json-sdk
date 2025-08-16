@@ -88,6 +88,7 @@ export function parseCPP(code, verbose) {
  */
 function canParse(type) {
     return type === 'namespace_definition' ||
+        type === 'enum_specifier' ||
         type === 'struct_specifier' ||
         type === 'class_specifier' ||
         type === 'template_declaration';
@@ -146,12 +147,14 @@ const parsers = [
     {type: 'function_definition', callback: ignore},
     {type: 'declaration_list', callback: parseTranslationUnit}, // See parseDeclarationList()
     {type: 'template_declaration', callback: parseTemplateDeclaration},
+    {type: 'enum_specifier', callback: parseEnum},
     {type: 'struct_specifier', callback: parseStruct},
     {type: 'class_specifier', callback: parseClass},
     {type: 'access_specifier', callback: parseAccess},
     {type: 'base_class_clause', callback: parseBaseClassClause},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
+    {type: 'enumerator_list', callback: parseEnumeratorList},
     {type: 'namespace_identifier', callback: parseNamespaceIdentifier},
     {type: 'qualified_identifier', callback: parseQualifiedIdentifier},
     {type: 'type_identifier', callback: parseTypeIdentifier},
@@ -259,6 +262,35 @@ function parseDeclarationList(stack, {parent, node}) {
         }
         stack.push({parent: parent, node: child});
     }
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseEnum(stack, {parent, node}) {
+    const name = node.childForFieldName('name');
+    if (!name) {
+        return;
+    }
+
+    const list = node.childForFieldName('body');
+    if (!list) {
+        return;
+    }
+
+    const data = {
+        type: 'enum',
+        name: name.text,
+    };
+    const base = node.childForFieldName('base');
+    if (base) {
+        data.base = base.text;
+    }
+    data.values = [];
+
+    parent.splice(0, 0, data);
+    stack.push({parent: data.values, node: list});
 }
 
 /**
@@ -447,6 +479,24 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
 
     parent.splice(0, 0, field);
     stack.push({parent: field.type, node: type, extra: declarators});
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseEnumeratorList(stack, {parent, node}) {
+    const enumerators = findChildrenByType(node, 'enumerator');
+
+    for (const enumerator of enumerators) {
+        const name = enumerator.childForFieldName('name');
+        const value = enumerator.childForFieldName('value');
+
+        parent.push({
+            name: name.text,
+            value: parseNumber(value.text)
+        });
+    }
 }
 
 /**

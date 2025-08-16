@@ -67,6 +67,8 @@ const startAt = Date.now();
 info(`Listing all header files in ${nicePath(srcPath)}...`, false);
 //*
 const files = [
+    //join('tests', 'class.hpp'),
+    //join('tests', 'enum.hpp'),
     //join('tests', 'struct.hpp'),
     //join('tests', 'struct_alignment.hpp'),
     //join('tests', 'struct_empty.hpp'),
@@ -76,7 +78,6 @@ const files = [
     //join('tests', 'struct_namespace.hpp'),
     //join('tests', 'struct_namespace_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
-    //join('tests', 'class.hpp'),
 
     //join(srcPath, 'Memory', 'Pool.hpp'),  TODO: support templated functions? support constant for fixedArray
     //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),    TODO: support identifier for expression?
