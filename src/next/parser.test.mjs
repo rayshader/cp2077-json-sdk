@@ -1,16 +1,16 @@
 import {describe, expect, it} from "@jest/globals";
 import {parseHeader} from "./parser.mjs";
-import {read} from "../../tests/setup.mjs";
+import {read, withFormatter} from "../../tests/setup.mjs";
 
 describe('struct', () => {
     it('should ignore forward structs declaration', () => {
-        const ast = parseHeader(read('tests/struct_forward.hpp'));
+        let ast = withFormatter(parseHeader(read('tests/struct_forward.hpp')));
 
         expect(ast).toHaveLength(0);
     });
 
     it('should parse empty structs', () => {
-        const ast = parseHeader(read('tests/struct_empty.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct_empty.hpp')));
 
         expect(ast).toEqual([
             {
@@ -27,7 +27,7 @@ describe('struct', () => {
     });
 
     it('should parse struct and its fields', () => {
-        const ast = parseHeader(read('tests/struct.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct.hpp')));
         expect(ast).toHaveLength(1);
 
         const struct = ast[0];
@@ -62,7 +62,7 @@ describe('struct', () => {
     });
 
     it('should parse struct and ignore functions/operators/ctor/dtor', () => {
-        const ast = parseHeader(read('tests/struct_functions.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct_functions.hpp')));
         expect(ast).toHaveLength(1);
 
         const struct = ast[0];
@@ -74,7 +74,7 @@ describe('struct', () => {
     });
 
     it('should parse struct with inheritance', () => {
-        const ast = parseHeader(read('tests/struct_inherit.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct_inherit.hpp')));
 
         expect(ast).toEqual([
             {
@@ -111,7 +111,7 @@ describe('struct', () => {
     });
 
     it('should parse structs within a namespace', () => {
-        const ast = parseHeader(read('tests/struct_namespace.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct_namespace.hpp')));
 
         expect(ast).toEqual([
             {
@@ -151,7 +151,7 @@ describe('struct', () => {
     });
 
     it('should parse structs with nested namespaces', () => {
-        const ast = parseHeader(read('tests/struct_namespace_nested.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct_namespace_nested.hpp')));
 
         expect(ast).toEqual([
             {
@@ -175,7 +175,7 @@ describe('struct', () => {
     });
 
     it('should parse structs with templates', () => {
-        const ast = parseHeader(read('tests/struct_template.hpp'));
+        const ast = withFormatter(parseHeader(read('tests/struct_template.hpp')));
 
         expect(ast).toEqual([
             // Vector<T>

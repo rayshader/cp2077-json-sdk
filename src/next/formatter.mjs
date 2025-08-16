@@ -30,32 +30,19 @@ export function formatCPP(node, indent) {
             }
             code += `{\n`;
             for (const field of node.fields) {
-                code += formatCPP(field, indent + 2);
+                code += formatCPP({type: 'field', node: field}, indent + 2);
             }
             code += `${pad}};\n`;
             break;
         }
-        default: {
-            let type = '';
+        case 'field': {
+            node = node.node;
+            code += `${pad}${formatCPP({type: 'type', node: node.type}, 0)} `;
+            code += node.name;
 
-            if (node.type.static)    type += 'static ';
-            if (node.type.constexpr) type += 'constexpr ';
-            if (node.type.const)     type += 'const ';
-            if (node.type.volatile)  type += 'volatile ';
-
-            type += node.type.name;
-
-            if (node.type.templates) {
-                type += '<';
-                type += node.type.templates.map((template) => template.name).join(', ');
-                type += '>';
+            if (node.type.fixedArray !== undefined) {
+                code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
             }
-
-            if (node.type.ptr) type += '*';
-            if (node.type.ref) type += '&';
-
-            code += `${pad}${type} ${node.name}`;
-            if (node.type.fixedArray !== undefined) code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
 
             code += ';';
 
@@ -64,6 +51,27 @@ export function formatCPP(node, indent) {
             }
 
             code += '\n';
+
+            break;
+        }
+        case 'type': {
+            node = node.node;
+            if (node.static)    code += 'static ';
+            if (node.constexpr) code += 'constexpr ';
+            if (node.const)     code += 'const ';
+            if (node.volatile)  code += 'volatile ';
+
+            code += node.name;
+
+            if (node.templates) {
+                code += '<';
+                code += node.templates.map((template) => formatCPP({type: 'type', node: template})).join(', ');
+                code += '>';
+            }
+
+            if (node.ptr) code += '*';
+            if (node.ref) code += '&';
+
             break;
         }
     }
