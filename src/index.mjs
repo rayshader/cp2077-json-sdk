@@ -80,9 +80,6 @@ const files = [
     //join('tests', 'struct_namespace_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
 
-    // TODO: support templated functions?
-    //       support evaluation of constant for fixedArray
-    //join(srcPath, 'Memory', 'Pool.hpp'),
     // TODO: support identifier for expression?
     //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
 ];

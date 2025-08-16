@@ -3,6 +3,7 @@
 struct GameApp {
   static constexpr const bool kMode = true;
   static constexpr const float kPi = 3.141592;
+  static constexpr const int32_t kMax = 128;
 
   bool isRunning;           // 00
   float delta;              // 04
@@ -25,4 +26,5 @@ struct GameApp {
   Handle<game::Object*> gameObjectRef;
 
   Array<float, 4> vector;
+  uint32_t fixedConstant[kMax];
 };

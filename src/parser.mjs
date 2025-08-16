@@ -41,6 +41,14 @@ export function parse(files, verbose) {
  * @property {object=} parent
  * @property {object=} node
  * @property {object=} extra
+ * @property {PostProcess=} post
+ */
+
+/**
+ * @typedef PostProcess
+ * @param code
+ * @property {any} data
+ * @property {function} callback
  */
 
 /**
@@ -175,6 +183,13 @@ function ignore() {
  */
 function parseNode(stack, verbose) {
     const it = stack.pop();
+
+    const post = it.post;
+    if (post) {
+        post.callback(post.data);
+        return;
+    }
+
     const node = it.node;
     const parser = parsers.find((item) => item.type === node.type);
     if (!parser) {
@@ -415,6 +430,8 @@ function parseTemplateDeclaration(stack, {parent, node}) {
  * @param it {StackIterator}
  */
 function parseFieldDeclarationList(stack, {parent, node}) {
+    stack.push({post: {data: parent, callback: postConstant}});
+
     const size = node.children.length;
     for (let i = 0; i < size; i++) {
         const child = node.children[i];
@@ -654,7 +671,9 @@ function parseDeclarators(node, declarators) {
                 break;
             case 'array_declarator':
                 const size = declarator.childForFieldName('size');
-                node.fixedArray = evalExpression(size);
+                const value = evalExpression(size);
+
+                node.fixedArray = value ?? size.text;
                 break;
         }
     }
@@ -684,6 +703,9 @@ function parseQualifiers(node, qualifiers) {
     }
 }
 
+/**
+ * @returns {number|string}
+ */
 function evalExpression(expr) {
     switch (expr.type) {
         case 'number_literal':
@@ -718,6 +740,8 @@ function evalExpression(expr) {
         case 'parenthesized_expression':
             expr = expr.child(1);
             return evalExpression(expr);
+        case 'identifier':
+            return expr.text;
         default:
             error(`Missing expression parser for: ${expr.type}`);
             return 0;
@@ -743,4 +767,17 @@ function parseNumber(literal) {
         options.radix = 2;
     }
     return parseInt(literal.substring(options.offset), options.radix);
+}
+
+function postConstant(fields) {
+    for (const field of fields) {
+        if (field.type.fixedArray === undefined) {
+            continue;
+        }
+
+        const constant = fields.find((item) => item.name === field.type.fixedArray);
+        if (constant) {
+            field.type.fixedArray = constant.default;
+        }
+    }
 }
