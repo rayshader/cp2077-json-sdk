@@ -152,6 +152,7 @@ const parsers = [
     {type: 'base_class_clause', callback: parseBaseClassClause},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
+    {type: 'namespace_identifier', callback: parseNamespaceIdentifier},
     {type: 'qualified_identifier', callback: parseQualifiedIdentifier},
     {type: 'type_identifier', callback: parseTypeIdentifier},
     {type: 'type_descriptor', callback: parseTypeDescriptor},
@@ -203,24 +204,45 @@ function parseTranslationUnit(stack, {parent, node}) {
  * @param it {StackIterator}
  */
 function parseNamespace(stack, {parent, node}) {
-    const name = findChildByType(node, 'namespace_identifier');
-    if (!name) {
+    const name = node.childForFieldName('name');
+    const body = node.childForFieldName('body');
+    if (!name || !body) {
         return;
     }
 
-    const body = findChildByType(node, 'declaration_list');
-    if (!body) {
-        return;
-    }
-
-    const namespace = {
+    let namespace = {
         'type': 'namespace',
-        'name': name.text,
+        'name': null,
         'children': []
     };
 
     parent.splice(0, 0, namespace);
+    namespace = parseNestedNamespace(namespace, name);
     stack.push({parent: namespace.children, node: body});
+}
+
+/**
+ * @param namespace {object}
+ * @param node {object}
+ * @return {object}
+ */
+function parseNestedNamespace(namespace, node) {
+    if (node.type === 'namespace_identifier') {
+        parseNamespaceIdentifier(null, {parent: namespace, node: node});
+        return namespace;
+    }
+
+    const name = node.child(0);
+    const next = node.child(2); // Skip `::`
+    parseNamespaceIdentifier(null, {parent: namespace, node: name});
+
+    const child = {
+        'type': 'namespace',
+        'name': null,
+        'children': []
+    };
+    namespace.children.push(child);
+    return parseNestedNamespace(child, next);
 }
 
 /**
@@ -448,6 +470,14 @@ function parseQualifiedIdentifier(stack, {parent, node, extra}) {
     }
 
     parseDeclarators(parent, extra);
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseNamespaceIdentifier(stack, {parent, node}) {
+    parent.name = node.text;
 }
 
 /**

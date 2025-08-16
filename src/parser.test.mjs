@@ -178,6 +178,48 @@ describe('struct', () => {
                         fields: [],
                     },
                 ]
+            },
+
+            {
+                type: 'namespace',
+                name: 'Universe',
+                children: [
+                    {
+                        type: 'struct',
+                        name: 'Body',
+                        fields: [],
+                    },
+                ]
+            },
+
+            {
+                type: 'namespace',
+                name: 'Universe',
+                children: [
+                    {
+                        type: 'namespace',
+                        name: 'Galaxy',
+                        children: [
+                            {
+                                type: 'namespace',
+                                name: 'StellarSystem',
+                                children: [
+                                    {
+                                        type: 'struct',
+                                        name: 'Planet',
+                                        fields: [],
+                                    },
+                                    {
+                                        type: 'struct',
+                                        name: 'Star',
+                                        inherit: {namespaces: ['Universe'], name: 'Body'},
+                                        fields: [],
+                                    },
+                                ]
+                            },
+                        ]
+                    },
+                ]
             }
         ]);
     });

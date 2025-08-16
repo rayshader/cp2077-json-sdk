@@ -25,6 +25,10 @@ export function formatCPP(node, indent) {
                 if (node.inherit.visibility) {
                     code += `${node.inherit.visibility} `;
                 }
+                if (node.inherit.namespaces) {
+                    code += node.inherit.namespaces.join('::');
+                    code += '::';
+                }
                 code += `${node.inherit.name}`;
                 if (node.inherit.templates) {
                     code += '<';
