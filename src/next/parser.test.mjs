@@ -46,6 +46,7 @@ describe('struct', () => {
 
                 {offset: 0x30, name: 'unk30', type: {name: 'uint8_t', fixedArray: 0x1B}},
                 {offset: 0x4B, name: 'unk4B', type: {name: 'uint8_t', fixedArray: 0x10}},
+                {name: 'unk78', type: {name: 'uintptr_t', fixedArray: 0x18}},
 
                 {name: 'pool', type: {name: 'HashMap', templates: [{name: 'uint64_t'}, {name: 'CString'}]}},
 

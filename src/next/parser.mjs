@@ -435,7 +435,7 @@ function parseDeclarators(node, declarators) {
                 break;
             case 'array_declarator':
                 const size = declarator.childForFieldName('size');
-                node.fixedArray = parseExpression(size);
+                node.fixedArray = evalExpression(size);
                 break;
         }
     }
@@ -465,22 +465,40 @@ function parseQualifiers(node, qualifiers) {
     }
 }
 
-function parseExpression(expr) {
+function evalExpression(expr) {
     switch (expr.type) {
         case 'number_literal':
             return parseNumber(expr.text);
         case 'binary_expression':
             const left = expr.child(0);
-            const operator = expr.child(1).text;
+            const operator = expr.child(1);
             const right = expr.child(2);
 
-            const a = parseExpression(left);
-            const b = parseExpression(right);
+            const a = evalExpression(left);
+            const b = evalExpression(right);
+            const op = operator.text;
 
-            if (operator === '-') {
-                return a - b;
+            switch (op) {
+                case '-':
+                    return a - b;
+                case '+':
+                    return a + b;
+                case '*':
+                    return a * b;
+                case '/':
+                    return a / b;
+                case '%':
+                    return a % b;
+                case '<<':
+                    return a << b;
+                case '>>':
+                    return a >> b;
+                default:
+                    return 0;
             }
-            return 0;
+        case 'parenthesized_expression':
+            expr = expr.child(1);
+            return evalExpression(expr);
         default:
             error(`Missing expression parser for: ${expr.type}`);
             return 0;

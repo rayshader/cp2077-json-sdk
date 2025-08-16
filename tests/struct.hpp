@@ -12,6 +12,7 @@ struct GameApp {
 
   uint8_t unk30[0x4B - 0x30]; // 30
   uint8_t unk4B[0x10]; // 4B
+  uintptr_t unk78[(0x138 - 0x78) >> 3];
 
   HashMap<uint64_t, CString> pool;
 
