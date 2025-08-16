@@ -1,6 +1,6 @@
 import fs from "fs";
 import {formatCPP} from "../src/formatter.mjs";
-import {parseHeader} from "../src/parser.mjs";
+import {parseCPP} from "../src/parser.mjs";
 
 /**
  * @param path {string}
@@ -20,5 +20,5 @@ export function withFormatter(ast) {
     for (const node of ast) {
         code += formatCPP(node, 0);
     }
-    return parseHeader(code);
+    return parseCPP(code);
 }

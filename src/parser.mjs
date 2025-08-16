@@ -14,7 +14,7 @@ export function parse(files, verbose) {
     for (const file of files) {
         try {
             const code = fs.readFileSync(file, {encoding: 'utf8'});
-            const ast = parseHeader(code, verbose);
+            const ast = parseCPP(code, verbose);
             if (ast) {
                 types.push({path: file, ast: ast});
             }
@@ -44,12 +44,12 @@ export function parse(files, verbose) {
  */
 
 /**
- * Parse a C++ header file and return its AST document.
+ * Parse a C++ file and return its AST document.
  * @param code {string}
  * @param verbose {boolean}
  * @return {object[]}
  */
-export function parseHeader(code, verbose) {
+export function parseCPP(code, verbose) {
     const tree = treeParser.parse(code);
 
     debug('');
