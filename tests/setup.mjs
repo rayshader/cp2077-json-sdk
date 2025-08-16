@@ -20,5 +20,5 @@ export function withFormatter(ast) {
     for (const node of ast) {
         code += formatCPP(node, 0);
     }
-    return parseCPP(code);
+    return parseCPP(code, false);
 }
