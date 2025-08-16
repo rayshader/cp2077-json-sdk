@@ -22,4 +22,6 @@ struct GameApp {
   game::Object* gameObject;
   Handle<game::world::worldNode> world;
   Handle<game::Object*> gameObjectRef;
+
+  Array<float, 4> vector;
 };

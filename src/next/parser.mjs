@@ -147,8 +147,10 @@ const parsers = [
     {type: 'field_declaration', callback: parseFieldDeclaration},
     {type: 'qualified_identifier', callback: parseQualifiedIdentifier},
     {type: 'type_identifier', callback: parseTypeIdentifier},
+    {type: 'type_descriptor', callback: parseTypeDescriptor},
     {type: 'primitive_type', callback: parsePrimitiveType},
     {type: 'template_type', callback: parseTemplateType},
+    {type: 'number_literal', callback: parseNumberLiteral},
 ];
 
 /**
@@ -401,6 +403,19 @@ function parseTypeIdentifier(stack, {parent, node, extra}) {
 }
 
 /**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseTypeDescriptor(stack, {parent, node}) {
+    const type = node.childForFieldName('type');
+    const decl = node.childForFieldName('declarator');
+    const template = {};
+    parent.splice(0, 0, template);
+
+    stack.push({parent: template, node: type, extra: decl ? [decl] : null});
+}
+
+/**
  * Parse primitive types with declarators like:
  * - `bool`
  * - `float`
@@ -425,22 +440,20 @@ function parsePrimitiveType(stack, {parent, node, extra}) {
  * - `HashMap<T, K>`
  * - `HashMap<uint64_t, CString>`
  * - `HashMap<uint64_t, WeakHandle<GameObject>>`
+ * - `Array<int, 10>`
  *
  * @param stack {Stack}
  * @param it {StackIterator}
  */
 function parseTemplateType(stack, {parent, node, extra}) {
     const args = node.childForFieldName('arguments');
-    const descriptors = findChildrenByType(args, 'type_descriptor');
     const templates = [];
 
-    for (const descriptor of descriptors) {
-        const type = descriptor.childForFieldName('type');
-        const decl = descriptor.childForFieldName('declarator');
-        const template = {};
-        templates.push(template);
-
-        stack.push({parent: template, node: type, extra: decl ? [decl] : null});
+    for (let i = 0; i < args.childCount; i++) {
+        const arg = args.child(i);
+        if (arg.type === 'type_descriptor' || arg.type === 'number_literal') {
+            stack.push({parent: templates, node: arg});
+        }
     }
 
     const name = node.childForFieldName('name');
@@ -448,6 +461,17 @@ function parseTemplateType(stack, {parent, node, extra}) {
     parent.templates = templates;
 
     parseDeclarators(parent, extra);
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseNumberLiteral(stack, {parent, node}) {
+    const literal = {
+        name: parseNumber(node.text)
+    };
+    parent.splice(0, 0, literal);
 }
 
 /**

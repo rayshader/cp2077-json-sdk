@@ -78,6 +78,17 @@ describe('struct', () => {
                         ]
                     }
                 },
+
+                {
+                    name: 'vector',
+                    type: {
+                        name: 'Array',
+                        templates: [
+                            {name: 'float'},
+                            {name: 4}
+                        ]
+                    }
+                },
             ],
         });
     });
