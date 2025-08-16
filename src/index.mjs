@@ -64,7 +64,7 @@ const printOK = () => {
 };
 
 const startAt = Date.now();
-info(`Listing all source files in ${nicePath(srcPath)}...`, false);
+info(`Listing all header files in ${nicePath(srcPath)}...`, false);
 //*
 const files = [
     //join('tests', 'struct.hpp'),
@@ -115,13 +115,13 @@ const files = traverse(srcPath).filter(path => {
 
 printOK();
 
-info(`Parsing ${chalk.bold(files.length)} source file${files.length > 1 ? 's' : ''}...`, false);
+info(`Parsing ${chalk.bold(files.length)} header file${files.length > 1 ? 's' : ''}...`, false);
 const {types, errors} = parse(files, verbose);
 
 if (errors === 0) {
     printOK();
 } else {
-    warn(`Failed to parse ${chalk.bold(errors)} source file${errors > 1 ? 's' : ''}.`);
+    warn(`Failed to parse ${chalk.bold(errors)} header file${errors > 1 ? 's' : ''}.`);
     if (!verbose) {
         warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
     }
