@@ -78,31 +78,11 @@ const files = [
     //join('tests', 'struct_template.hpp'),
     //join('tests', 'class.hpp'),
 
-    //join(srcPath, 'Scripting', 'Natives', 'Vector4.hpp'),
-    //join(srcPath, 'CName.hpp'),
-    //join(srcPath, 'DynArray.hpp'),
-
-    //join(srcPath, 'Scripting', 'IScriptable.hpp'),
-    //join(srcPath, 'Scripting', 'Stack.hpp'),
-    //join(srcPath, 'ISerializable.hpp'),
-    //join(srcPath, 'CName.hpp'),
-    //join(srcPath, 'DynArray.hpp'),
-    //join(srcPath, 'GameEngine.hpp'),
-    //join(srcPath, 'LaunchParameters.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'move', 'Policies.hpp'),
-    //join(srcPath, 'Hashing', 'CRC.hpp'),
-    //join(srcPath, 'Memory', 'Pool.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Vector4.hpp'),
-    //join(srcPath, 'RTTISystem.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'game', 'weapon', 'Grenade.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
-    //join(srcPath, 'Memory', 'SharedPtr.hpp'),
-    //join(srcPath, 'Map.hpp'),
+    //join(srcPath, 'Memory', 'Pool.hpp'),  TODO: support templated functions? support constant for fixedArray
+    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),    TODO: support identifier for expression?
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'EMeshChunkFlags.hpp'),
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ECookingPlatform.hpp'),
     //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ETextureCompression.hpp'),
-    //join(srcPath, 'ResourceDepot.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'gameIEntityStubSystem.hpp'),
 ];
 //*/
 /*
