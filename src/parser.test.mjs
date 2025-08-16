@@ -255,3 +255,43 @@ describe('struct', () => {
         ]);
     });
 });
+
+describe('class', () => {
+    it('should parse class with access', () => {
+        const ast = withFormatter(parseHeader(read('tests/class.hpp')));
+        expect(ast).toEqual([
+            {
+                type: 'class',
+                name: 'ISerializable',
+                fields: [
+                    {name: 'typeName', type: {name: 'CName'}},
+                ]
+            },
+            {
+                type: 'class',
+                name: 'IScriptable',
+                inherit: {visibility: 'public', name: 'ISerializable'},
+                fields: [
+                    {
+                        name: 'properties',
+                        type: {
+                            name: 'DynArray',
+                            templates: [
+                                {name: 'CProperty', 'ptr': true}
+                            ]
+                        }
+                    },
+                    {
+                        name: 'functions',
+                        type: {
+                            name: 'DynArray',
+                            templates: [
+                                {name: 'CBaseFunction', 'ptr': true}
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]);
+    });
+});

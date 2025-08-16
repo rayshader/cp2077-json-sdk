@@ -11,6 +11,7 @@ export function formatCPP(node, indent) {
             code += `${pad}}\n`;
             break;
         }
+        case 'class':
         case 'struct': {
             if (node.templates) {
                 code += `${pad}template`;
@@ -18,9 +19,13 @@ export function formatCPP(node, indent) {
                 code += node.templates.map((template) => `typename ${template.name}`).join(', ');
                 code += `>\n`;
             }
-            code += `${pad}struct ${node.name} `;
+            code += `${pad}${node.type} ${node.name} `;
             if (node.inherit) {
-                code += `: ${node.inherit.name}`;
+                code += `: `;
+                if (node.inherit.visibility) {
+                    code += `${node.inherit.visibility} `;
+                }
+                code += `${node.inherit.name}`;
                 if (node.inherit.templates) {
                     code += '<';
                     code += node.inherit.templates.map((template) => template.name).join(', ');

@@ -87,7 +87,10 @@ export function parseHeader(code, verbose) {
  * @returns {boolean}
  */
 function canParse(type) {
-    return type === 'namespace_definition' || type === 'struct_specifier' || type === 'template_declaration';
+    return type === 'namespace_definition' ||
+        type === 'struct_specifier' ||
+        type === 'class_specifier' ||
+        type === 'template_declaration';
 }
 
 /**
@@ -139,9 +142,13 @@ function isFunction(decl) {
 const parsers = [
     {type: 'translation_unit', callback: parseTranslationUnit},
     {type: 'namespace_definition', callback: parseNamespace},
+    {type: 'concept_definition', callback: ignore},
+    {type: 'function_definition', callback: ignore},
     {type: 'declaration_list', callback: parseTranslationUnit}, // See parseDeclarationList()
     {type: 'template_declaration', callback: parseTemplateDeclaration},
     {type: 'struct_specifier', callback: parseStruct},
+    {type: 'class_specifier', callback: parseClass},
+    {type: 'access_specifier', callback: parseAccess},
     {type: 'base_class_clause', callback: parseBaseClassClause},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
@@ -152,6 +159,10 @@ const parsers = [
     {type: 'template_type', callback: parseTemplateType},
     {type: 'number_literal', callback: parseNumberLiteral},
 ];
+
+function ignore() {
+    // NOTE: placeholder to silently ignore some nodes.
+}
 
 /**
  * @param stack {Stack}
@@ -267,10 +278,57 @@ function parseStruct(stack, {parent, node, extra}) {
  * @param stack {Stack}
  * @param it {StackIterator}
  */
+function parseClass(stack, {parent, node, extra}) {
+    const inherit = findChildByType(node, 'base_class_clause');
+
+    const fields = findChildByType(node, 'field_declaration_list');
+    if (!fields) {
+        // Ignore forward class declaration.
+        return;
+    }
+
+    const name = findChildByType(node, 'type_identifier');
+    if (!name) {
+        return;
+    }
+
+    const klass = {
+        'type': 'class',
+        'name': name.text,
+    };
+    if (extra) {
+        klass.templates = extra;
+    }
+    if (inherit) {
+        klass.inherit = {};
+        stack.push({parent: klass.inherit, node: inherit});
+    }
+    klass.fields = [];
+
+    parent.splice(0, 0, klass);
+    stack.push({parent: klass.fields, node: fields});
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseAccess(stack, {parent, node}) {
+    parent.visibility = node.text;
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
 function parseBaseClassClause(stack, {parent, node}) {
     // NOTE: only one base class is supported.
-    const clause = node.child(1);
-    stack.push({parent: parent, node: clause});
+    for (const child of node.children) {
+        if (child.type === ':') {
+            continue;
+        }
+        stack.push({parent: parent, node: child});
+    }
 }
 
 /**
@@ -374,7 +432,7 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
  * @param it {StackIterator}
  */
 function parseQualifiedIdentifier(stack, {parent, node, extra}) {
-    const namespaces  = [];
+    const namespaces = [];
     parent.namespaces = namespaces;
 
     while (node) {
