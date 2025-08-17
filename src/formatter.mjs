@@ -52,6 +52,11 @@ export function formatCPP(node, indent) {
                 code += ' ';
             }
             code += `{\n`;
+
+            for (const child of node.nested) {
+                code += formatCPP(child, indent + 2);
+            }
+
             for (const field of node.fields) {
                 code += formatCPP({type: 'field', node: field}, indent + 2);
             }

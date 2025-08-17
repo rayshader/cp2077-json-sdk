@@ -78,10 +78,11 @@ const files = [
     //join('tests', 'struct_inherit.hpp'),
     //join('tests', 'struct_namespace.hpp'),
     //join('tests', 'struct_namespace_nested.hpp'),
+    //join('tests', 'struct_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
 
-    // TODO: support nested declarations (structs, enums, etc)
-    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
+    // TODO: support union declarations
+    //join(srcPath, 'CString.hpp'),
 ];
 //*/
 /*

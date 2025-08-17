@@ -338,10 +338,11 @@ function parseStruct(stack, {parent, node, extra}) {
         struct.inherit = {};
         stack.push({parent: struct.inherit, node: inherit});
     }
+    struct.nested = [];
     struct.fields = [];
 
     parent.splice(0, 0, struct);
-    stack.push({parent: struct.fields, node: fields});
+    stack.push({parent: struct, node: fields});
 }
 
 /**
@@ -373,10 +374,11 @@ function parseClass(stack, {parent, node, extra}) {
         klass.inherit = {};
         stack.push({parent: klass.inherit, node: inherit});
     }
+    klass.nested = [];
     klass.fields = [];
 
     parent.splice(0, 0, klass);
-    stack.push({parent: klass.fields, node: fields});
+    stack.push({parent: klass, node: fields});
 }
 
 /**
@@ -429,7 +431,7 @@ function parseTemplateDeclaration(stack, {parent, node}) {
  * @param stack {Stack}
  * @param it {StackIterator}
  */
-function parseFieldDeclarationList(stack, {parent, node}) {
+function parseFieldDeclarationList(stack, {parent, node, extra}) {
     stack.push({post: {data: parent, callback: postConstant}});
 
     const size = node.children.length;
@@ -460,6 +462,10 @@ function parseFieldDeclarationList(stack, {parent, node}) {
 function parseFieldDeclaration(stack, {parent, node, extra}) {
     const type = node.childForFieldName('type');
     if (!type) {
+        return;
+    }
+    if (canParse(type.type)) {
+        stack.push({parent: parent.nested, node: type});
         return;
     }
 
@@ -517,7 +523,7 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
         }
     }
 
-    parent.splice(0, 0, field);
+    parent.fields.splice(0, 0, field);
     stack.push({parent: field.type, node: type, extra: declarators});
 }
 
@@ -779,7 +785,8 @@ function parseNumber(literal) {
     return parseInt(literal.substring(options.offset), options.radix);
 }
 
-function postConstant(fields) {
+function postConstant(parent) {
+    const fields = parent.fields;
     for (const field of fields) {
         const type = field.type;
 

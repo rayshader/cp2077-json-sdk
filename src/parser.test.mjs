@@ -60,11 +60,13 @@ describe('struct', () => {
             {
                 type: 'struct',
                 name: 'GameApp',
+                nested: [],
                 fields: [],
             },
             {
                 type: 'struct',
                 name: 'GameNetwork',
+                nested: [],
                 fields: [],
             }
         ]);
@@ -78,6 +80,7 @@ describe('struct', () => {
         expect(struct).toEqual({
             type: 'struct',
             name: 'GameApp',
+            nested: [],
             fields: [
                 {
                     name: 'kMode',
@@ -197,6 +200,7 @@ describe('struct', () => {
             {
                 type: 'struct',
                 name: 'ColorFlags',
+                nested: [],
                 fields: [
                     {name: 'r', type: {name: 'uint8_t', bitfield: 3}},
                     {name: 'g', type: {name: 'uint8_t', bitfield: 2}},
@@ -214,6 +218,7 @@ describe('struct', () => {
         expect(struct).toEqual({
             type: 'struct',
             name: 'GameApp',
+            nested: [],
             fields: [],
         });
     });
@@ -225,12 +230,14 @@ describe('struct', () => {
             {
                 type: 'struct',
                 name: 'Entity',
+                nested: [],
                 fields: [],
             },
             {
                 type: 'struct',
                 name: 'GameObject',
                 inherit: {name: 'Entity'},
+                nested: [],
                 fields: [],
             },
             {
@@ -239,6 +246,7 @@ describe('struct', () => {
                 templates: [
                     {name: 'T'}
                 ],
+                nested: [],
                 fields: [],
             },
             {
@@ -250,6 +258,7 @@ describe('struct', () => {
                         {name: 'GameObject'}
                     ]
                 },
+                nested: [],
                 fields: [],
             },
         ]);
@@ -263,7 +272,50 @@ describe('struct', () => {
                 type: 'struct',
                 name: 'Backpack',
                 inherit: {name: 'Storage'},
+                nested: [],
                 fields: [],
+            },
+        ]);
+    });
+
+    it('should parse struct and nested structs', () => {
+        const ast = withFormatter(parseCPP(read('tests/struct_nested.hpp')));
+
+        expect(ast).toEqual([
+            {
+                type: 'struct',
+                name: 'Player',
+                nested: [
+                    {
+                        type: 'enum',
+                        name: 'Owner',
+                        base: 'int8_t',
+                        values: [
+                            {name: 'Player', value: 0},
+                            {name: 'Johnny', value: 1},
+                            {name: 'Puppet', value: 2},
+                            {name: 'Count', value: 3},
+                            {name: 'Invalid', value: 4},
+                        ]
+                    },
+
+                    {
+                        type: 'struct',
+                        name: 'Binding',
+                        nested: [],
+                        fields: [
+                            {name: 'id', type: {name: 'uint32_t'}},
+                            {name: 'position', type: {name: 'Vector3'}},
+                            {name: 'rotation', type: {name: 'Vector3'}},
+                        ]
+                    }
+                ],
+                fields: [
+                    {name: 'position', type: {name: 'Vector3'}},
+                    {name: 'velocity', type: {name: 'Vector3'}},
+                    {name: 'rotation', type: {name: 'Vector3'}},
+                    {name: 'parent', type: {name: 'Binding'}},
+                ],
             },
         ]);
     });
@@ -279,11 +331,13 @@ describe('struct', () => {
                     {
                         type: 'struct',
                         name: 'GameApp',
+                        nested: [],
                         fields: [],
                     },
                     {
                         type: 'struct',
                         name: 'GameNetwork',
+                        nested: [],
                         fields: [],
                     },
                 ]
@@ -296,11 +350,13 @@ describe('struct', () => {
                     {
                         type: 'struct',
                         name: 'RendererSystem',
+                        nested: [],
                         fields: [],
                     },
                     {
                         type: 'struct',
                         name: 'AudioSystem',
+                        nested: [],
                         fields: [],
                     },
                 ]
@@ -313,6 +369,7 @@ describe('struct', () => {
                     {
                         type: 'struct',
                         name: 'Body',
+                        nested: [],
                         fields: [],
                     },
                 ]
@@ -333,12 +390,14 @@ describe('struct', () => {
                                     {
                                         type: 'struct',
                                         name: 'Planet',
+                                        nested: [],
                                         fields: [],
                                     },
                                     {
                                         type: 'struct',
                                         name: 'Star',
                                         inherit: {namespaces: ['Universe'], name: 'Body'},
+                                        nested: [],
                                         fields: [],
                                     },
                                 ]
@@ -365,6 +424,7 @@ describe('struct', () => {
                             {
                                 type: 'struct',
                                 name: 'EventListener',
+                                nested: [],
                                 fields: [],
                             }
                         ],
@@ -385,6 +445,7 @@ describe('struct', () => {
                 templates: [
                     {name: 'T'},
                 ],
+                nested: [],
                 fields: [
                     {offset: 0x0, type: {name: 'T', 'ptr': true}, name: 'items'},
                     {offset: 0x8, type: {name: 'uint32_t'}, name: 'size'},
@@ -400,6 +461,7 @@ describe('struct', () => {
                     {name: 'K'},
                     {name: 'V'},
                 ],
+                nested: [],
                 fields: [
                     {type: {name: 'K'}, name: 'key'},
                     {type: {name: 'V'}, name: 'value'},
@@ -414,6 +476,7 @@ describe('struct', () => {
                     {name: 'K'},
                     {name: 'V'},
                 ],
+                nested: [],
                 fields: [
                     {type: {name: 'Pair', templates: [{name: 'K'}, {name: 'V'}], 'ptr': true}, name: 'pairs'},
                     {type: {name: 'uint32_t'}, name: 'size'},
@@ -431,6 +494,7 @@ describe('class', () => {
             {
                 type: 'class',
                 name: 'ISerializable',
+                nested: [],
                 fields: [
                     {name: 'typeName', type: {name: 'CName'}},
                 ]
@@ -439,6 +503,7 @@ describe('class', () => {
                 type: 'class',
                 name: 'IScriptable',
                 inherit: {visibility: 'public', name: 'ISerializable'},
+                nested: [],
                 fields: [
                     {
                         name: 'properties',
