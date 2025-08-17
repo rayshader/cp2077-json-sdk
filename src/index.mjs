@@ -5,8 +5,7 @@ import {z} from "zod";
 import {parser as cliParser} from "zod-opts";
 
 import {debug, print, error, info, nicePath, formatTime, warn} from "./logger.mjs";
-import {parse} from "./parser.mjs";
-import {traverse} from "./traverse.mjs";
+import {traverse, parse} from "./filesystem.mjs";
 
 const opts = cliParser()
     .name('pnpm start')
@@ -65,7 +64,9 @@ const printOK = () => {
 
 const startAt = Date.now();
 info(`Listing all header files in ${nicePath(srcPath)}...`, false);
-//*
+
+// Development environment
+/*
 const files = [
     //join('tests', 'class.hpp'),
     //join('tests', 'enum.hpp'),
@@ -85,50 +86,45 @@ const files = [
     //join(srcPath, 'CString.hpp'),
     // TODO: fix enum value assignment with expression and constant value
     //join(srcPath, 'SystemUpdate.hpp'),
-
-    //join(srcPath, 'Scripting', 'Functions.hpp'),
-    //join(srcPath, 'SortedArray.hpp'),
 ];
 //*/
-/*
-const files = traverse(srcPath).filter(path => {
-    if (path.includes(join('include', 'RED4ext', 'Api'))) {
-        return false;
-    }
-    return true;
-});
+
+// Production environment
+//*
+const ignores = [
+    join('include', 'RED4ext', 'Api'),
+    join('include', 'RED4ext', 'Detail'),
+];
+const files = traverse(srcPath).filter(path => !ignores.includes(path));
 //*/
 
 printOK();
 
 info(`Parsing ${chalk.bold(files.length)} header file${files.length > 1 ? 's' : ''}...`, false);
-const {types, errors} = parse(files, verbose);
-
-if (errors === 0) {
-    printOK();
-} else {
+const {documents, errors} = parse(files, verbose);
+if (errors > 0) {
     warn(`Failed to parse ${chalk.bold(errors)} header file${errors > 1 ? 's' : ''}.`);
     if (!verbose) {
         warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
     }
+} else if (!verbose) {
+    printOK();
 }
 
-/*
-
-const flattenObjects = (type) => {
-    if (!type.objects) {
+const flatten = (ast) => {
+    if (!ast) {
         return [];
     }
-    return [...type.objects, type.objects.flatMap(flattenObjects)];
+    return [...ast, ast.flatMap(flatten)];
 };
-const count = types.flatMap(flattenObjects).length;
+const count = documents.flatMap((document) => document.ast).length;
 
 info(`Writing AST to JSON format for ${chalk.bold(count)} type${count > 1 ? 's' : ''}...`, false);
 
 let ignore = 0;
 
-types.forEach(type => {
-    const objects = type.objects;
+documents.forEach((document) => {
+    const objects = document.ast;
     let data = '';
 
     objects.forEach((object, i) => {
@@ -141,7 +137,7 @@ types.forEach(type => {
             data += '\n\n';
         }
     });
-    const relativePath = relative(join('sdk', 'include', 'RED4ext'), type.path);
+    const relativePath = relative(join('sdk', 'include', 'RED4ext'), document.path);
     const filePath = join(outputPath, relativePath).replace('.hpp', '.json');
     const dirPath = dirname(filePath);
 
@@ -166,7 +162,6 @@ types.forEach(type => {
 if (ignore === 0) {
     printOK();
 }
-*/
 
 const elapsedTime = Date.now() - startAt;
 

@@ -2,6 +2,8 @@
   "name": "cp2077-json-sdk",
   "version": "1.0.0",
   "description": "A tool to parse C++ declarations of RED4ext.SDK to AST-like format in JSON.",
+  "author": "Rayshader",
+  "license": "MIT",
   "keywords": [
     "cyberpunk",
     "modding",
@@ -9,14 +11,15 @@
     "sdk",
     "native",
     "types",
-    "json"
+    "json",
+    "ast",
+    "dump"
   ],
-  "author": "Rayshader",
-  "license": "MIT",
   "main": "src/index.mjs",
   "type": "module",
   "scripts": {
-    "start": "node src/index.mjs --verbose --sdk \"sdk\" --output \"types\"",
+    "dev": "node src/index.mjs --sdk \"sdk\" --output \"types\"",
+    "start": "node src/index.mjs --sdk \"sdk\" --output \"types\" --minify",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {

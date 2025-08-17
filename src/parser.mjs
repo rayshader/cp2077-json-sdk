@@ -1,35 +1,9 @@
 import Parser from "tree-sitter";
 import GrammarCPP from "tree-sitter-cpp";
-import fs from "fs";
-import {debug, error, nicePath} from "./logger.mjs";
-import {formatCPP} from "./formatter.mjs";
+import {error} from "./logger.mjs";
 
 const treeParser = new Parser();
 treeParser.setLanguage(GrammarCPP);
-
-export function parse(files, verbose) {
-    const types = [];
-    let errors = 0;
-
-    for (const file of files) {
-        try {
-            const code = fs.readFileSync(file, {encoding: 'utf8'});
-            const ast = parseCPP(code, verbose);
-            if (ast) {
-                types.push({path: file, ast: ast});
-            }
-        } catch (e) {
-            errors++;
-            if (!verbose) {
-                error(`Failed to parse file ${nicePath(file)}.`);
-            } else {
-                error(`Failed to parse file ${nicePath(file)}:`);
-                error(e);
-            }
-        }
-    }
-    return {types, errors: errors};
-}
 
 /**
  * @typedef {StackIterator[]} Stack
@@ -60,8 +34,6 @@ export function parse(files, verbose) {
 export function parseCPP(code, verbose) {
     const tree = treeParser.parse(code);
 
-    debug('');
-
     /** @type {any[]} */
     const root = [];
 
@@ -78,7 +50,7 @@ export function parseCPP(code, verbose) {
     debug(JSON.stringify(root, null, 1));
     //*/
 
-    //*
+    /*
     debug('```cpp');
     for (const node of root) {
         const code = formatCPP(node, 0);
