@@ -99,6 +99,7 @@ function canParse(type) {
         type === 'enum_specifier' ||
         type === 'struct_specifier' ||
         type === 'class_specifier' ||
+        type === 'union_specifier' ||
         type === 'template_declaration';
 }
 
@@ -158,6 +159,7 @@ const parsers = [
     {type: 'enum_specifier', callback: parseEnum},
     {type: 'struct_specifier', callback: parseStruct},
     {type: 'class_specifier', callback: parseClass},
+    {type: 'union_specifier', callback: ignore}, // ignoring for now
     {type: 'access_specifier', callback: parseAccess},
     {type: 'base_class_clause', callback: parseBaseClassClause},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
@@ -379,6 +381,32 @@ function parseClass(stack, {parent, node, extra}) {
 
     parent.splice(0, 0, klass);
     stack.push({parent: klass, node: fields});
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseUnion(stack, {parent, node}) {
+    // TODO: to be done
+    const body = node.childForFieldName('body');
+    if (!body) {
+        return;
+    }
+
+    const union = {
+        type: 'union',
+    };
+
+    const name = node.childForFieldName('name');
+    if (name) {
+        union.name = name.text;
+    }
+
+    union.fields = [];
+
+    parent.splice(0, 0, union);
+    stack.push({parent: union, node: body});
 }
 
 /**
