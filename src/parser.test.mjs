@@ -84,18 +84,18 @@ describe('struct', () => {
             fields: [
                 {
                     name: 'kMode',
-                    type: {'static': true, 'constexpr': true, 'const': true, name: 'bool'},
+                    type: {static: true, constexpr: true, const: true, name: 'bool'},
                     default: 'true'
                 },
                 {
                     name: 'kPi',
-                    type: {'static': true, 'constexpr': true, 'const': true, name: 'float'},
+                    type: {static: true, constexpr: true, const: true, name: 'float'},
                     default: 3.141592
                 },
-                {name: 'kMax', type: {'static': true, 'constexpr': true, 'const': true, name: 'int32_t'}, default: 128},
+                {name: 'kMax', type: {static: true, constexpr: true, const: true, name: 'int32_t'}, default: 128},
                 {
                     name: 'kAudioSize',
-                    type: {'static': true, 'constexpr': true, 'const': true, name: 'uint32_t'},
+                    type: {static: true, constexpr: true, const: true, name: 'uint32_t'},
                     default: 'ESystemPoolSize::Audio'
                 },
 
