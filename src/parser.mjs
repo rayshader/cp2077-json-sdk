@@ -537,12 +537,17 @@ function parseEnumeratorList(stack, {parent, node}) {
     for (const enumerator of enumerators) {
         const name = enumerator.childForFieldName('name');
         const content = enumerator.childForFieldName('value');
-        const value = parseNumber(content.text);
+        const value = content ? parseNumber(content.text) : null;
 
-        parent.push({
+        const item = {
             name: name.text,
-            value: Number.isNaN(value) ? content.text : value
-        });
+        };
+
+        if (value !== null) {
+            item.value = Number.isNaN(value) ? content.text : value;
+        }
+
+        parent.push(item);
     }
 }
 

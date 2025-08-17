@@ -25,8 +25,8 @@ describe('enum', () => {
                     {name: 'Rectangle', value: 0},
                     {name: 'Circle', value: 1},
                     {name: 'Triangle', value: 2},
-                    {name: 'Count', value: 3},
-                    {name: 'Invalid', value: 4},
+                    {name: 'Count'},
+                    {name: 'Invalid'},
                 ]
             },
             {

@@ -11,8 +11,8 @@ enum EShape : int8_t {
   Rectangle = 0,
   Circle = 1,
   Triangle = 2,
-  Count = 3,
-  Invalid = 4
+  Count,
+  Invalid
 };
 
 enum ETextureFormat : uint16_t {

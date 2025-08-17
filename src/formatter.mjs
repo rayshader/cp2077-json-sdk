@@ -19,7 +19,14 @@ export function formatCPP(node, indent) {
             code += `{\n`;
 
             const padValue = padding(indent + 2);
-            code += node.values.map((value) => `${padValue}${value.name} = ${value.value}`).join(',\n');
+            code += node.values
+                .map((value) => {
+                    if (value.value === undefined) {
+                        return `${padValue}${value.name}`;
+                    }
+                    return `${padValue}${value.name} = ${value.value}`;
+                })
+                .join(',\n');
             code += '\n';
 
             code += `${pad}};\n`;
