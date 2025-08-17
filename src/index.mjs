@@ -83,20 +83,11 @@ const files = [
 
     // TODO: support union declarations (currently ignored)
     //join(srcPath, 'CString.hpp'),
-
-    // TODO: fix parser
-    join(srcPath, 'GameApplication.hpp'),
-    //join(srcPath, 'GameStates.hpp'),
-    //join(srcPath, 'HashMap.hpp'),
-    //join(srcPath, 'NodeRef.hpp'),
-    //join(srcPath, 'GpuApi', 'CommandListContext.hpp'),
-    //join(srcPath, 'GpuApi', 'SwapChain.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'animAnimBufferState.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'animKeyFrames.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'gameIEntityStubSystem.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'gameIPersistencySystem.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'inkCharacterEvent.hpp'),
+    // TODO: fix enum value assignment with expression and constant value
     //join(srcPath, 'SystemUpdate.hpp'),
+
+    //join(srcPath, 'Scripting', 'Functions.hpp'),
+    //join(srcPath, 'SortedArray.hpp'),
 ];
 //*/
 /*

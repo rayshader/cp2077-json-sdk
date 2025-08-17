@@ -24,4 +24,8 @@ template<typename T, uint32_t N>
 struct Array {
   T items[N];
   uint32_t size;
-}
+};
+
+template<typename T = CResource>
+struct ResourceRef {
+};

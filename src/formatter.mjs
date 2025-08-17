@@ -39,10 +39,17 @@ export function formatCPP(node, indent) {
                 code += `<`;
                 code += node.templates
                     .map((template) => {
+                        let code = '';
                         if (template.type === undefined) {
-                            return `typename ${template.name}`;
+                            code += 'typename ';
+                        } else {
+                            code += `${template.type} `;
                         }
-                        return `${template.type} ${template.name}`;
+                        code += template.name;
+                        if (template.default !== undefined) {
+                            code += ` = ${template.default}`;
+                        }
+                        return code;
                     })
                     .join(', ');
                 code += `>\n`;

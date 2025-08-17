@@ -508,6 +508,17 @@ describe('struct', () => {
                     },
                     {type: {name: 'uint32_t'}, name: 'size'},
                 ]
+            },
+
+            // ResourceRef<T = CResource>
+            {
+                type: 'struct',
+                name: 'ResourceRef',
+                templates: [
+                    {name: 'T', default: 'CResource'},
+                ],
+                nested: [],
+                fields: []
             }
         ]);
     });

@@ -458,6 +458,11 @@ function parseTemplateDeclaration(stack, {parent, node}) {
             template.type = type.text;
         }
 
+        const defaultType = param.childForFieldName('default_type');
+        if (defaultType) {
+            template.default = defaultType.text;
+        }
+
         stack.push({parent: template, node: identifier});
     }
 
