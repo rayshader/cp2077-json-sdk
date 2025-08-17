@@ -19,3 +19,9 @@ struct Map {
   uint32_t size;
   uint32_t capacity;
 };
+
+template<typename T, uint32_t N>
+struct Array {
+  T items[N];
+  uint32_t size;
+}

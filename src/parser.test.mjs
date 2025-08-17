@@ -487,6 +487,27 @@ describe('struct', () => {
                     {type: {name: 'uint32_t'}, name: 'size'},
                     {type: {name: 'uint32_t'}, name: 'capacity'}
                 ]
+            },
+
+            // Array<T, N>
+            {
+                type: 'struct',
+                name: 'Array',
+                templates: [
+                    {name: 'T'},
+                    {type: 'uint32_t', name: 'N'},
+                ],
+                nested: [],
+                fields: [
+                    {
+                        type: {
+                            name: 'T',
+                            fixedArray: 'N'
+                        },
+                        name: 'items'
+                    },
+                    {type: {name: 'uint32_t'}, name: 'size'},
+                ]
             }
         ]);
     });

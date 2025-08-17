@@ -449,7 +449,12 @@ function parseTemplateDeclaration(stack, {parent, node}) {
         const template = {};
         templates.push(template);
 
-        stack.push({parent: template, node: type});
+        const type = param.childForFieldName('type');
+        if (type) {
+            template.type = type.text;
+        }
+
+        stack.push({parent: template, node: identifier});
     }
 
     stack.push({parent: parent, node: next, extra: templates});

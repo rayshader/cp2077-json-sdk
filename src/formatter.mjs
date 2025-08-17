@@ -37,7 +37,14 @@ export function formatCPP(node, indent) {
             if (node.templates) {
                 code += `${pad}template`;
                 code += `<`;
-                code += node.templates.map((template) => `typename ${template.name}`).join(', ');
+                code += node.templates
+                    .map((template) => {
+                        if (template.type === undefined) {
+                            return `typename ${template.name}`;
+                        }
+                        return `${template.type} ${template.name}`;
+                    })
+                    .join(', ');
                 code += `>\n`;
             }
             code += `${pad}${node.type} ${node.name} `;
