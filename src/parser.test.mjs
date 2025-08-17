@@ -106,10 +106,10 @@ describe('struct', () => {
 
                 {offset: 0x0, name: 'isRunning', type: {name: 'bool'}},
                 {offset: 0x4, name: 'delta', type: {name: 'float'}},
-                {offset: 0x8, name: 'context', type: {name: 'void', 'ptr': true}},
+                {offset: 0x8, name: 'context', type: {name: 'void', ptr: true}},
 
                 {offset: 0x10, name: 'buffer', type: {name: 'DynArray', templates: [{name: 'int32_t'}]}},
-                {offset: 0x20, name: 'lines', type: {name: 'DynArray', templates: [{name: 'char', 'ptr': true}]}},
+                {offset: 0x20, name: 'lines', type: {name: 'DynArray', templates: [{name: 'char', ptr: true}]}},
 
                 {offset: 0x30, name: 'unk30', type: {name: 'uint8_t', fixedArray: 0x1B}},
                 {offset: 0x4B, name: 'unk4B', type: {name: 'uint8_t', fixedArray: 0x10}},
@@ -121,7 +121,7 @@ describe('struct', () => {
                     name: 'components',
                     type: {
                         name: 'DynArray',
-                        templates: [{name: 'Handle', templates: [{name: 'void', 'ptr': true}]}]
+                        templates: [{name: 'Handle', templates: [{name: 'void', ptr: true}]}]
                     }
                 },
 
@@ -452,7 +452,7 @@ describe('struct', () => {
                 ],
                 nested: [],
                 fields: [
-                    {offset: 0x0, type: {name: 'T', 'ptr': true}, name: 'items'},
+                    {offset: 0x0, type: {name: 'T', ptr: true}, name: 'items'},
                     {offset: 0x8, type: {name: 'uint32_t'}, name: 'size'},
                     {offset: 0xC, type: {name: 'uint32_t'}, name: 'capacity'}
                 ]
@@ -483,7 +483,7 @@ describe('struct', () => {
                 ],
                 nested: [],
                 fields: [
-                    {type: {name: 'Pair', templates: [{name: 'K'}, {name: 'V'}], 'ptr': true}, name: 'pairs'},
+                    {type: {name: 'Pair', templates: [{name: 'K'}, {name: 'V'}], ptr: true}, name: 'pairs'},
                     {type: {name: 'uint32_t'}, name: 'size'},
                     {type: {name: 'uint32_t'}, name: 'capacity'}
                 ]
@@ -547,7 +547,7 @@ describe('class', () => {
                         type: {
                             name: 'DynArray',
                             templates: [
-                                {name: 'CProperty', 'ptr': true}
+                                {name: 'CProperty', ptr: true}
                             ]
                         }
                     },
@@ -556,7 +556,7 @@ describe('class', () => {
                         type: {
                             name: 'DynArray',
                             templates: [
-                                {name: 'CBaseFunction', 'ptr': true}
+                                {name: 'CBaseFunction', ptr: true}
                             ]
                         }
                     }
