@@ -169,6 +169,7 @@ const parsers = [
     {type: 'enumerator_list', callback: parseEnumeratorList},
     {type: 'namespace_identifier', callback: parseNamespaceIdentifier},
     {type: 'qualified_identifier', callback: parseQualifiedIdentifier},
+    {type: 'identifier', callback: parseIdentifier},
     {type: 'type_identifier', callback: parseTypeIdentifier},
     {type: 'type_descriptor', callback: parseTypeDescriptor},
     {type: 'placeholder_type_specifier', callback: parsePlaceholderTypeSpecifier},
@@ -443,8 +444,9 @@ function parseTemplateDeclaration(stack, {parent, node}) {
     const templates = [];
 
     for (const param of list.children) {
-        const type = findChildByType(param, 'type_identifier');
-        if (!type) {
+        let identifier = findChildByType(param, 'type_identifier');
+        identifier ??= param.childForFieldName('declarator');
+        if (!identifier) {
             continue;
         }
 
@@ -618,6 +620,14 @@ function parseQualifiedIdentifier(stack, {parent, node, extra}) {
  * @param it {StackIterator}
  */
 function parseNamespaceIdentifier(stack, {parent, node}) {
+    parent.name = node.text;
+}
+
+/**
+ * @param stack {Stack}
+ * @param it {StackIterator}
+ */
+function parseIdentifier(stack, {parent, node, extra}) {
     parent.name = node.text;
 }
 
