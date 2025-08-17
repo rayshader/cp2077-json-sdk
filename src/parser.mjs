@@ -156,12 +156,14 @@ const parsers = [
     {type: 'function_definition', callback: ignore},
     {type: 'declaration_list', callback: parseTranslationUnit}, // See parseDeclarationList()
     {type: 'template_declaration', callback: parseTemplateDeclaration},
+    {type: 'alias_declaration', callback: ignore},
     {type: 'enum_specifier', callback: parseEnum},
     {type: 'struct_specifier', callback: parseStruct},
     {type: 'class_specifier', callback: parseClass},
     {type: 'union_specifier', callback: ignore}, // ignoring for now
     {type: 'access_specifier', callback: parseAccess},
     {type: 'base_class_clause', callback: parseBaseClassClause},
+    {type: 'requires_clause', callback: ignore},
     {type: 'field_declaration_list', callback: parseFieldDeclarationList},
     {type: 'field_declaration', callback: parseFieldDeclaration},
     {type: 'enumerator_list', callback: parseEnumeratorList},
