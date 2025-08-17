@@ -542,7 +542,11 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
         // NOTE: convert 'static_cast<T>(N::F)' to 'N::F'
         if (defaultValue.type === 'call_expression') {
             defaultValue = defaultValue.childForFieldName('arguments').child(1);
-            text = `${defaultValue.childForFieldName('scope').text}::${defaultValue.childForFieldName('name').text}`;
+            const scope = defaultValue.childForFieldName('scope');
+            const name = defaultValue.childForFieldName('name');
+            if (scope && name) {
+                text = `${scope.text}::${name.text}`;
+            }
         }
 
         field.default = parseNumber(text);

@@ -98,6 +98,11 @@ describe('struct', () => {
                     type: {static: true, constexpr: true, const: true, name: 'uint32_t'},
                     default: 'ESystemPoolSize::Audio'
                 },
+                {
+                    name: 'kBool',
+                    type: {static: true, constexpr: true, const: true, name: 'auto'},
+                    default: 'FNV1a64("Bool")'
+                },
 
                 {offset: 0x0, name: 'isRunning', type: {name: 'bool'}},
                 {offset: 0x4, name: 'delta', type: {name: 'float'}},

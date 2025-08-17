@@ -11,6 +11,7 @@ struct GameApp {
   static constexpr const float kPi = 3.141592;
   static constexpr const int32_t kMax = 128;
   static constexpr const uint32_t kAudioSize = static_cast<uint32_t>(ESystemPoolSize::Audio);
+  static constexpr const auto kBool = FNV1a64("Bool");
 
   bool isRunning;           // 00
   float delta;              // 04
