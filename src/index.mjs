@@ -5,11 +5,10 @@ import {z} from "zod";
 import {parser as cliParser} from "zod-opts";
 
 import {debug, print, error, info, nicePath, formatTime, warn} from "./logger.mjs";
-import {parse} from "./parse.mjs";
-import {traverse} from "./traverse.mjs";
+import {traverse, parse} from "./filesystem.mjs";
 
 const opts = cliParser()
-    .name('pnpm run start')
+    .name('pnpm start')
     .version('1.0.0')
     .options({
         sdk: {
@@ -20,8 +19,17 @@ const opts = cliParser()
             type: z.string().describe('Path to output JSON types.').default('types'),
             alias: 'dst'
         },
+        /*
+        merge: {
+            type: z.boolean().describe('Merge all types in a single file.').default(false),
+        },
+        */
         minify: {
             type: z.boolean().describe('Minify JSON output.').default(false),
+            alias: 'm'
+        },
+        compress: {
+            type: z.boolean().describe('Compress JSON output.').default(false),
             alias: 'c'
         },
         verbose: {
@@ -32,7 +40,9 @@ const opts = cliParser()
 
 const sdkPath = opts.sdk;
 const outputPath = opts.output;
+//const merge = opts.merge;
 const minify = opts.minify;
+const compress = opts.compress;
 const verbose = opts.verbose;
 
 if (!fs.existsSync(sdkPath) || !fs.statSync(sdkPath).isDirectory()) {
@@ -58,68 +68,112 @@ const printOK = () => {
 };
 
 const startAt = Date.now();
-info(`Listing all source files in ${nicePath(srcPath)}...`, false);
+info(`Listing all header files in ${nicePath(srcPath)}...`, false);
+
+// Development environment
 /*
 const files = [
-    //join(srcPath, 'Scripting', 'IScriptable.hpp'),
-    //join(srcPath, 'Scripting', 'Stack.hpp'),
-    //join(srcPath, 'ISerializable.hpp'),
-    //join(srcPath, 'CName.hpp'),
-    //join(srcPath, 'GameEngine.hpp'),
-    //join(srcPath, 'LaunchParameters.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'move', 'Policies.hpp'),
-    //join(srcPath, 'Hashing', 'CRC.hpp'),
-    //join(srcPath, 'Memory', 'Pool.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Vector4.hpp'),
-    //join(srcPath, 'RTTISystem.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'game', 'weapon', 'Grenade.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
-    //join(srcPath, 'Memory', 'SharedPtr.hpp'),
-    //join(srcPath, 'Map.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'EMeshChunkFlags.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ECookingPlatform.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'Generated', 'ETextureCompression.hpp'),
-    //join(srcPath, 'ResourceDepot.hpp'),
-    //join(srcPath, 'Scripting', 'Natives', 'gameIEntityStubSystem.hpp'),
+    //join('tests', 'class.hpp'),
+    //join('tests', 'enum.hpp'),
+    //join('tests', 'struct.hpp'),
+    //join('tests', 'struct_alignment.hpp'),
+    //join('tests', 'struct_bitfield.hpp'),
+    //join('tests', 'struct_empty.hpp'),
+    //join('tests', 'struct_forward.hpp'),
+    //join('tests', 'struct_functions.hpp'),
+    //join('tests', 'struct_inherit.hpp'),
+    //join('tests', 'struct_namespace.hpp'),
+    //join('tests', 'struct_namespace_nested.hpp'),
+    //join('tests', 'struct_nested.hpp'),
+    //join('tests', 'struct_template.hpp'),
+
+    // TODO: support union declarations (currently ignored)
+    //join(srcPath, 'CString.hpp'),
+    // TODO: fix enum value assignment with expression and constant value
+    //join(srcPath, 'SystemUpdate.hpp'),
 ];
 //*/
+
+// Production environment
 //*
-const files = traverse(srcPath).filter(path => {
-    if (path.includes(join('include', 'RED4ext', 'Api'))) {
-        return false;
-    }
-    return true;
-});
+const ignores = [
+    join('include', 'RED4ext', 'Api'),
+    join('include', 'RED4ext', 'Detail'),
+];
+const files = traverse(srcPath).filter(path => !ignores.includes(path));
 //*/
 
 printOK();
 
-info(`Parsing ${chalk.bold(files.length)} source file${files.length > 1 ? 's' : ''}...`, false);
-const {types, errors} = parse(files, verbose);
-
-if (errors === 0) {
-    printOK();
-} else {
-    warn(`Failed to parse ${chalk.bold(errors)} source file${errors > 1 ? 's' : ''}.`);
+info(`Parsing ${chalk.bold(files.length)} header file${files.length > 1 ? 's' : ''}...`, false);
+const {documents, errors} = parse(files, verbose);
+if (errors > 0) {
+    warn(`Failed to parse ${chalk.bold(errors)} header file${errors > 1 ? 's' : ''}.`);
     if (!verbose) {
         warn(`Run with option ${chalk.bold('--verbose')} for more details.`);
     }
+} else if (!verbose) {
+    printOK();
 }
 
-const flattenObjects = (type) => {
-    if (!type.objects) {
-        return [];
-    }
-    return [...type.objects, type.objects.flatMap(flattenObjects)];
-};
-const count = types.flatMap(flattenObjects).length;
+const count = documents.flatMap((document) => document.ast).length;
+
+if (compress) {
+    info('Compressing JSON format...', false);
+
+    const labels = [
+        'type', 'name', 'offset', 'children', 'nested', 'fields', 'templates', 'namespaces',
+        'base', 'values', 'default', 'constant', 'fixedArray', 'ptr', 'ref', 'static', 'constexpr', 'const',
+        'bitfield', 'value', 'visibility'
+    ];
+    const bindings = labels
+        .map((label, i) => [label, String.fromCharCode(i + 'a'.charCodeAt(0))]);
+
+    const compressor = (object) => {
+        for (const binding of bindings) {
+            const key = binding[0];
+            if (key in object) {
+                object[binding[1]] = object[key];
+                delete object[key];
+            }
+        }
+    };
+
+    documents.forEach((document) => {
+        const compressObject = (object) => {
+            if (!(object instanceof Object)) {
+                return;
+            }
+
+            for (const key of Object.keys(object)) {
+                const value = object[key];
+
+                if (value instanceof Object) {
+                    compressObject(value);
+                }
+                if (value instanceof Array) {
+                    for (const child of value) {
+                        compressObject(child);
+                    }
+                }
+            }
+
+            compressor(object);
+        };
+
+        const objects = document.ast;
+        objects.forEach(compressObject);
+    });
+
+    printOK();
+}
 
 info(`Writing AST to JSON format for ${chalk.bold(count)} type${count > 1 ? 's' : ''}...`, false);
 
 let ignore = 0;
 
-types.forEach(type => {
-    const objects = type.objects;
+documents.forEach((document) => {
+    const objects = document.ast;
     let data = '';
 
     objects.forEach((object, i) => {
@@ -132,7 +186,7 @@ types.forEach(type => {
             data += '\n\n';
         }
     });
-    const relativePath = relative(join('sdk', 'include', 'RED4ext'), type.path);
+    const relativePath = relative(join('sdk', 'include', 'RED4ext'), document.path);
     const filePath = join(outputPath, relativePath).replace('.hpp', '.json');
     const dirPath = dirname(filePath);
 

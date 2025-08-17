@@ -2,6 +2,8 @@
   "name": "cp2077-json-sdk",
   "version": "1.0.0",
   "description": "A tool to parse C++ declarations of RED4ext.SDK to AST-like format in JSON.",
+  "author": "Rayshader",
+  "license": "MIT",
   "keywords": [
     "cyberpunk",
     "modding",
@@ -9,20 +11,30 @@
     "sdk",
     "native",
     "types",
-    "json"
+    "json",
+    "ast",
+    "dump"
   ],
-  "author": "Rayshader",
-  "license": "MIT",
   "main": "src/index.mjs",
+  "type": "module",
   "scripts": {
-    "start": "node src/index.mjs --sdk \"sdk\" --output \"types\""
+    "dev": "node src/index.mjs --sdk \"sdk\" --output \"types\" --verbose",
+    "start": "node src/index.mjs --sdk \"sdk\" --output \"types\" --minify",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
-    "chalk": "^5.4.1",
-    "tree-sitter": "^0.22.4",
-    "tree-sitter-cli": "^0.24.6",
+    "chalk": "^5.5.0",
+    "tree-sitter": "^0.25.0",
+    "tree-sitter-cli": "^0.25.8",
     "tree-sitter-cpp": "^0.23.4",
-    "zod": "^3.24.1",
+    "zod": "^3.25.76",
     "zod-opts": "^0.1.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "babel-jest": "^30.0.5",
+    "cross-env": "^10.0.0",
+    "jest": "^30.0.5"
   }
 }
