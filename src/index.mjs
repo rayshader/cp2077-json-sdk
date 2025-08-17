@@ -26,6 +26,10 @@ const opts = cliParser()
         */
         minify: {
             type: z.boolean().describe('Minify JSON output.').default(false),
+            alias: 'm'
+        },
+        compress: {
+            type: z.boolean().describe('Compress JSON output.').default(false),
             alias: 'c'
         },
         verbose: {
@@ -38,6 +42,7 @@ const sdkPath = opts.sdk;
 const outputPath = opts.output;
 //const merge = opts.merge;
 const minify = opts.minify;
+const compress = opts.compress;
 const verbose = opts.verbose;
 
 if (!fs.existsSync(sdkPath) || !fs.statSync(sdkPath).isDirectory()) {
@@ -111,13 +116,57 @@ if (errors > 0) {
     printOK();
 }
 
-const flatten = (ast) => {
-    if (!ast) {
-        return [];
-    }
-    return [...ast, ast.flatMap(flatten)];
-};
 const count = documents.flatMap((document) => document.ast).length;
+
+if (compress) {
+    info('Compressing JSON format...', false);
+
+    const labels = [
+        'type', 'name', 'offset', 'children', 'nested', 'fields', 'templates', 'namespaces',
+        'base', 'values', 'default', 'constant', 'fixedArray', 'ptr', 'ref', 'static', 'constexpr', 'const',
+        'bitfield', 'value', 'visibility'
+    ];
+    const bindings = labels
+        .map((label, i) => [label, String.fromCharCode(i + 'a'.charCodeAt(0))]);
+
+    const compressor = (object) => {
+        for (const binding of bindings) {
+            const key = binding[0];
+            if (key in object) {
+                object[binding[1]] = object[key];
+                delete object[key];
+            }
+        }
+    };
+
+    documents.forEach((document) => {
+        const compressObject = (object) => {
+            if (!(object instanceof Object)) {
+                return;
+            }
+
+            for (const key of Object.keys(object)) {
+                const value = object[key];
+
+                if (value instanceof Object) {
+                    compressObject(value);
+                }
+                if (value instanceof Array) {
+                    for (const child of value) {
+                        compressObject(child);
+                    }
+                }
+            }
+
+            compressor(object);
+        };
+
+        const objects = document.ast;
+        objects.forEach(compressObject);
+    });
+
+    printOK();
+}
 
 info(`Writing AST to JSON format for ${chalk.bold(count)} type${count > 1 ? 's' : ''}...`, false);
 
