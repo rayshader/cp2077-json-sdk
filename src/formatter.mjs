@@ -68,7 +68,12 @@ export function formatCPP(node, indent) {
             }
 
             if (node.type.fixedArray !== undefined) {
-                code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
+                let isConstant = Number.isNaN(parseInt(node.type.fixedArray));
+                if (isConstant) {
+                    code += `[${node.type.fixedArray}]`;
+                } else {
+                    code += `[0x${node.type.fixedArray.toString(16).toUpperCase()}]`;
+                }
             }
 
             if (node.default !== undefined) {

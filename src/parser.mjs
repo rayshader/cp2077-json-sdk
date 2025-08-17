@@ -500,11 +500,20 @@ function parseFieldDeclaration(stack, {parent, node, extra}) {
         field.type.bitfield = parseNumber(bitfield.child(1).text);
     }
 
-    const defaultValue = node.childForFieldName('default_value');
+    let defaultValue = node.childForFieldName('default_value');
     if (defaultValue) {
-        field.default = parseNumber(defaultValue.text);
+        let text = defaultValue.text;
+
+        // TODO: use stack or a direct function call to parse correctly.
+        // NOTE: convert 'static_cast<T>(N::F)' to 'N::F'
+        if (defaultValue.type === 'call_expression') {
+            defaultValue = defaultValue.childForFieldName('arguments').child(1);
+            text = `${defaultValue.childForFieldName('scope').text}::${defaultValue.childForFieldName('name').text}`;
+        }
+
+        field.default = parseNumber(text);
         if (Number.isNaN(field.default)) {
-            field.default = defaultValue.text;
+            field.default = text;
         }
     }
 
@@ -741,6 +750,7 @@ function evalExpression(expr) {
             expr = expr.child(1);
             return evalExpression(expr);
         case 'identifier':
+        case 'qualified_identifier':
             return expr.text;
         default:
             error(`Missing expression parser for: ${expr.type}`);
@@ -777,6 +787,9 @@ function postConstant(fields) {
             const constant = fields.find((item) => item.name === type.fixedArray);
             if (constant) {
                 type.fixedArray = constant.default;
+                if (typeof constant.default === 'string') {
+                    type.constant = true;
+                }
             }
         }
 
@@ -785,6 +798,9 @@ function postConstant(fields) {
                 const constant = fields.find((item) => item.name === template.name);
                 if (constant) {
                     template.name = constant.default;
+                    if (typeof constant.default === 'string') {
+                        template.constant = true;
+                    }
                 }
             }
         }

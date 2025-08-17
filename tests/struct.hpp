@@ -1,9 +1,16 @@
 #pragma once
 
+/*
+enum ESystemPoolSize : uint32_t {
+  Audio = 1024
+};
+*/
+
 struct GameApp {
   static constexpr const bool kMode = true;
   static constexpr const float kPi = 3.141592;
   static constexpr const int32_t kMax = 128;
+  static constexpr const uint32_t kAudioSize = static_cast<uint32_t>(ESystemPoolSize::Audio);
 
   bool isRunning;           // 00
   float delta;              // 04
@@ -28,4 +35,6 @@ struct GameApp {
   Array<float, 4> vector;
   uint32_t fixedConstant[kMax];
   Array<void*, kMax> resources;
+
+  Array<uint32_t, kAudioSize> pool[kAudioSize];
 };

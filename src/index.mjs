@@ -80,7 +80,7 @@ const files = [
     //join('tests', 'struct_namespace_nested.hpp'),
     //join('tests', 'struct_template.hpp'),
 
-    // TODO: support external constant value
+    // TODO: support nested declarations (structs, enums, etc)
     //join(srcPath, 'Scripting', 'Natives', 'worldAnimationSystem.hpp'),
 ];
 //*/

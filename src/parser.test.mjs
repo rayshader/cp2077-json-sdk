@@ -90,6 +90,11 @@ describe('struct', () => {
                     default: 3.141592
                 },
                 {name: 'kMax', type: {'static': true, 'constexpr': true, 'const': true, name: 'int32_t'}, default: 128},
+                {
+                    name: 'kAudioSize',
+                    type: {'static': true, 'constexpr': true, 'const': true, name: 'uint32_t'},
+                    default: 'ESystemPoolSize::Audio'
+                },
 
                 {offset: 0x0, name: 'isRunning', type: {name: 'bool'}},
                 {offset: 0x4, name: 'delta', type: {name: 'float'}},
@@ -161,6 +166,22 @@ describe('struct', () => {
                             },
                             {
                                 name: 128
+                            }
+                        ],
+                    }
+                },
+                {
+                    name: 'pool',
+                    type: {
+                        name: 'Array',
+                        fixedArray: 'ESystemPoolSize::Audio',
+                        templates: [
+                            {name: 'uint32_t'},
+                            {
+                                // NOTE: the first pass will output {name: 'ESystemPoolSize::Audio'} as expected.
+                                //       the second pass is changed as the original statement is not preserved.
+                                name: 'Audio',
+                                namespaces: ['ESystemPoolSize']
                             }
                         ],
                     }
