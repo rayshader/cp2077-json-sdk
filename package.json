@@ -1,6 +1,6 @@
 {
   "name": "cp2077-json-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tool to parse C++ declarations of RED4ext.SDK to AST-like format in JSON.",
   "author": "Rayshader",
   "license": "MIT",
