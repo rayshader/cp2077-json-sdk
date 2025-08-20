@@ -176,17 +176,13 @@ documents.forEach((document) => {
     const objects = document.ast;
     let data = '';
 
-    objects.forEach((object, i) => {
-        if (minify) {
-            data += JSON.stringify(object);
-        } else {
-            data += JSON.stringify(object, null, 2);
-        }
-        if (i + 1 < objects.length) {
-            data += '\n\n';
-        }
-    });
-    const relativePath = relative(join('sdk', 'include', 'RED4ext'), document.path);
+    if (minify) {
+        data = JSON.stringify(objects);
+    } else {
+        data = JSON.stringify(objects, null, 2);
+    }
+
+    const relativePath = relative(join(sdkPath, 'include', 'RED4ext'), document.path);
     const filePath = join(outputPath, relativePath).replace('.hpp', '.json');
     const dirPath = dirname(filePath);
 
