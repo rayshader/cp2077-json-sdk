@@ -97,10 +97,19 @@ const files = [
 // Production environment
 //*
 const ignores = [
-    join('include', 'RED4ext', 'Api'),
-    join('include', 'RED4ext', 'Detail'),
+    join(srcPath, 'Api'),
+    join(srcPath, 'Detail'),
+    join(srcPath, 'Dump'),
+    join(srcPath, 'Hashing'),
 ];
-const files = traverse(srcPath).filter(path => !ignores.includes(path));
+const files = traverse(srcPath).filter((path) => {
+    for (const ignore of ignores) {
+        if (path.startsWith(ignore)) {
+            return false;
+        }
+    }
+    return !ignores.includes(path);
+});
 //*/
 
 printOK();
