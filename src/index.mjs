@@ -186,7 +186,7 @@ documents.forEach((document) => {
     const filePath = join(outputPath, relativePath).replace('.hpp', '.json');
     const dirPath = dirname(filePath);
 
-    if (!data || data.length === 0) {
+    if (objects.length === 0 || !data || data.length === 0) {
         if (verbose) {
             if (ignore === 0) {
                 print('');
